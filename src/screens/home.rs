@@ -14,11 +14,16 @@ use tui::{
 pub fn ui<B: Backend>(f: &mut Frame<B>, menu: &mut Menu) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Percentage(20), Constraint::Percentage(80)].as_ref())
+        .constraints([
+            Constraint::Percentage(20), 
+            Constraint::Percentage(10), 
+            Constraint::Percentage(70)
+        ].as_ref())
         .split(f.size());
 
     render_header(f, chunks[0]);
-    render_menu(f, chunks[1], menu);
+    render_menu_instructions(f, chunks[1]);
+    render_menu(f, chunks[2], menu);
 }
 
 fn render_header<B: Backend>(f: &mut Frame<B>, area: Rect) {
@@ -41,6 +46,21 @@ fn render_header<B: Backend>(f: &mut Frame<B>, area: Rect) {
         .wrap(Wrap { trim: true });
 
     f.render_widget(header, area);
+}
+
+fn render_menu_instructions<B: Backend>(f: &mut Frame<B>, area: Rect) {
+    let text = vec![
+        Spans::from(Span::raw("")),
+        Spans::from(Span::raw("You can use UP or DOWN arrows to navigate through menu items and ENTER to confirm")),
+        Spans::from(Span::raw("or you can use the specified key shortcut to instantly confirm")),
+    ];
+    let instructions = Paragraph::new(text)
+        .block(Block::default().borders(Borders::TOP | Borders::BOTTOM))
+        .style(Style::default().fg(Color::White).bg(Color::DarkGray))
+        .alignment(Alignment::Center)
+        .wrap(Wrap { trim: true });
+
+    f.render_widget(instructions, area);
 }
 
 fn render_menu<B: Backend>(f: &mut Frame<B>, area: Rect, menu: &mut Menu) {

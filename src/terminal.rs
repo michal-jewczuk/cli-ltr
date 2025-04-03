@@ -24,14 +24,7 @@ pub fn run() -> Result<(), io::Error> {
     let mut terminal = Terminal::new(backend)?;
 
     // tmp
-    let menu_items = vec![
-        "Tests [t]",
-        "Results [r]",
-        "Redo [d]",
-        "Help [h]",
-        "Exit [q]",
-    ];
-    let mut menu = menu::Menu::new(menu_items);
+    let mut menu = menu::Menu::home();
 
     // TODO add refresh rate as parameter
     let result = run_app(&mut terminal, &mut menu, Duration::from_millis(250));

@@ -7,7 +7,19 @@ pub struct Menu<'a> {
 
 
 impl<'a> Menu<'a> {
-    pub fn new(items: Vec<&'a str>) -> Self {
+    pub fn home() -> Self {
+        let items = vec![
+            "[1] Tests",
+            "[2] Results",
+            "[3] Redo",
+            "[4] Help",
+            "[q] Exit",
+        ];
+        Self::new(items)
+    }
+
+
+    fn new(items: Vec<&'a str>) -> Self {
         let mut state = ListState::default();
         if items.len() > 0 {
             state.select(Some(0));
@@ -42,6 +54,5 @@ impl<'a> Menu<'a> {
         };
         self.state.select(Some(i));
     }
-
 }
 
