@@ -2,12 +2,10 @@
 use crate::ui::menu;
 use crate::screens::home;
 
-use std::{io, thread, time::{Duration, Instant}};
+use std::{io, time::{Duration, Instant}};
 use tui::{
     backend::{Backend,CrosstermBackend},
-    widgets::{Widget, Block, Borders},
-    layout::{Layout, Constraint, Direction},
-    Frame, Terminal
+    Terminal
 };
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
@@ -36,7 +34,7 @@ pub fn run() -> Result<(), io::Error> {
     let mut menu = menu::Menu::new(menu_items);
 
     // TODO add refresh rate as parameter
-    run_app(&mut terminal, &mut menu, Duration::from_millis(250));
+    let result = run_app(&mut terminal, &mut menu, Duration::from_millis(250));
 
     //restore terminal
     disable_raw_mode()?;
@@ -47,7 +45,8 @@ pub fn run() -> Result<(), io::Error> {
     )?;
     terminal.show_cursor()?;
 
-    Ok(())
+    //Ok(())
+    result
 }
 
 fn run_app<B: Backend>(
@@ -60,9 +59,9 @@ fn run_app<B: Backend>(
     loop {
         terminal.draw(|f| home::ui(f, menu))?;
 
-        let timeout = tick_rate
-            .checked_sub(last_tick.elapsed())
-            .unwrap_or_else(|| Duration::from_secs(0));
+        //let timeout = tick_rate
+        //    .checked_sub(last_tick.elapsed())
+        //    .unwrap_or_else(|| Duration::from_secs(0));
 
         if crossterm::event::poll(Duration::from_millis(50))? {
             if let Event::Key(key) = event::read()? {
