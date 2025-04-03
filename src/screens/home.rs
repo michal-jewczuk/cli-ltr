@@ -15,8 +15,8 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, menu: &mut Menu) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Percentage(20), 
-            Constraint::Percentage(10), 
+            Constraint::Percentage(15), 
+            Constraint::Percentage(15), 
             Constraint::Percentage(70)
         ].as_ref())
         .split(f.size());
@@ -68,7 +68,7 @@ fn render_menu<B: Backend>(f: &mut Frame<B>, area: Rect, menu: &mut Menu) {
         .map(|&i| ListItem::new(i))
         .collect();
     let list = List::new(items)
-        .block(Block::default().borders(Borders::TOP))
+        .block(Block::default().borders(Borders::TOP | Borders::BOTTOM))
         .style(Style::default().fg(Color::White))
         .highlight_style(
             Style::default()
@@ -78,7 +78,7 @@ fn render_menu<B: Backend>(f: &mut Frame<B>, area: Rect, menu: &mut Menu) {
         .highlight_symbol(">> ");
     let x = area.width / 2 - 10;
     let y = area.y + 2;
-    let menu_area = Rect::new(x, y, 20, 10);
+    let menu_area = Rect::new(x, y, 20, 7);
 
     f.render_stateful_widget(list, menu_area, &mut menu.state);
 }

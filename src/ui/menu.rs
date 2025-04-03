@@ -9,10 +9,10 @@ pub struct Menu<'a> {
 impl<'a> Menu<'a> {
     pub fn home() -> Self {
         let items = vec![
-            "[1] Tests",
-            "[2] Results",
-            "[3] Redo",
-            "[4] Help",
+            "[t] Tests",
+            "[r] Results",
+            "[d] Redo",
+            "[h] Help",
             "[q] Exit",
         ];
         Self::new(items)
