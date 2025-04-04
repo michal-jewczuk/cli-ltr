@@ -1,5 +1,5 @@
 
-use crate::screens::{home, test};
+use crate::screens::{help, home, rerun, results, test};
 
 use std::io;
 use tui::{
@@ -12,7 +12,7 @@ use crossterm::event::{Event, KeyCode, KeyEvent};
 pub enum ScreenType {
     Home,
     Tests,
-    Scores,
+    Results,
     Rerun,
     Help,
     Quit,
@@ -23,6 +23,9 @@ pub struct App<'a> {
     current_screen: ScreenType,
     home: home::Home<'a>,
     tests: test::Tests,
+    results: results::Results,
+    rerun: rerun::Rerun,
+    help: help::Help,
 }
 
 impl App<'_> {
@@ -32,6 +35,9 @@ impl App<'_> {
             current_screen: ScreenType::Home,
             home: home::Home::new(),
             tests: test::Tests::new(),
+            results: results::Results::new(),
+            rerun: rerun::Rerun::new(),
+            help: help::Help::new(),
         }
     }
 
@@ -39,6 +45,9 @@ impl App<'_> {
         match self.current_screen {
             ScreenType::Home => self.home.draw(f),
             ScreenType::Tests => self.tests.draw(f),
+            ScreenType::Results => self.results.draw(f),
+            ScreenType::Rerun => self.rerun.draw(f),
+            ScreenType::Help => self.help.draw(f),
             ScreenType::Quit => self.is_finished = true,
             _ => {} 
         }
@@ -68,6 +77,9 @@ impl App<'_> {
         match self.current_screen {
             ScreenType::Home => self.current_screen = self.home.handle_key_code(code),
             ScreenType::Tests => self.current_screen = self.tests.handle_key_code(code),
+            ScreenType::Results => self.current_screen = self.results.handle_key_code(code),
+            ScreenType::Rerun => self.current_screen = self.rerun.handle_key_code(code),
+            ScreenType::Help => self.current_screen = self.help.handle_key_code(code),
             _ => {}
         }
         Ok(())

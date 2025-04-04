@@ -50,6 +50,9 @@ impl<'a> Home<'a> {
             Some(screen) => {
                 match screen {
                     0 => ScreenType::Tests,
+                    1 => ScreenType::Results,
+                    2 => ScreenType::Rerun,
+                    3 => ScreenType::Help,
                     4 => ScreenType::Quit,
                     _ => ScreenType::Home
                 }
