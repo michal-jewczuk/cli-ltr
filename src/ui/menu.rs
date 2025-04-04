@@ -19,7 +19,7 @@ impl<'a> Menu<'a> {
     }
 
 
-    fn new(items: Vec<&'a str>) -> Self {
+    pub fn new(items: Vec<&'a str>) -> Self {
         let mut state = ListState::default();
         if items.len() > 0 {
             state.select(Some(0));

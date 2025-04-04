@@ -1,5 +1,5 @@
 use crate::app::ScreenType;
-use crate::ui::menu::Menu;
+use crate::ui::{layout, menu::Menu};
 
 use tui::{
     backend::Backend,
@@ -99,18 +99,7 @@ impl<'a> Home<'a> {
     }
 
     fn render_menu<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let items: Vec<ListItem> = self.menu.items.iter()
-            .map(|&i| ListItem::new(i))
-            .collect();
-        let list = List::new(items)
-            .block(Block::default().borders(Borders::TOP | Borders::BOTTOM))
-            .style(Style::default().fg(Color::White))
-            .highlight_style(
-                Style::default()
-                .bg(Color::Magenta)
-                .add_modifier(Modifier::BOLD)
-                )
-            .highlight_symbol(">> ");
+        let list = layout::create_navigable_list(self.menu.items.clone());
         let x = area.width / 2 - 10;
         let y = area.y + 2;
         let menu_area = Rect::new(x, y, 20, 7);

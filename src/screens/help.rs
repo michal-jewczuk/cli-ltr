@@ -53,5 +53,6 @@ impl Help {
 
         f.render_widget(navbar, area);
     }
+
 }
 

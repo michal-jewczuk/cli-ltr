@@ -3,7 +3,7 @@ use tui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, Paragraph, Wrap},
+    widgets::{Block, Borders, List, ListItem, Paragraph, Wrap},
     Frame,
 };
 
@@ -16,6 +16,21 @@ pub fn get_basic_layout<B: Backend>(f: &mut Frame<B>) -> Vec<Rect> {
             Constraint::Percentage(85)
             ].as_ref())
         .split(f.size())
+}
+
+pub fn create_navigable_list<'a>(items: Vec<&'a str>) -> List<'a> {
+    let list_items: Vec<ListItem> = items.iter()
+        .map(|&i| ListItem::new(i))
+        .collect();
+    List::new(list_items)
+        .block(Block::default().borders(Borders::TOP | Borders::BOTTOM))
+        .style(Style::default().fg(Color::White))
+        .highlight_style(
+            Style::default()
+            .bg(Color::Magenta)
+            .add_modifier(Modifier::BOLD)
+            )
+        .highlight_symbol(">> ")
 }
 
 pub fn get_header(text: Vec<Spans>) -> Paragraph {
