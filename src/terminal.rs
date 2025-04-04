@@ -33,7 +33,6 @@ pub fn run() -> Result<(), io::Error> {
     )?;
     terminal.show_cursor()?;
 
-    //Ok(())
     result
 }
 
@@ -45,7 +44,6 @@ fn run_app<B: Backend>(
     let mut last_tick = Instant::now();
     let mut app = App::new();
     loop {
-        //terminal.draw(|f| home::ui(f, menu))?;
         terminal.draw(|f| app.draw(f))?;
 
         let timeout = tick_rate
@@ -53,18 +51,10 @@ fn run_app<B: Backend>(
             .unwrap_or_else(|| Duration::from_secs(0));
 
         if crossterm::event::poll(timeout)? {
-            app.on_terminal_event(event::read()?);
+            app.on_terminal_event(event::read()?)?;
             if app.is_done() {
                 return Ok(());
             }
-            //if let Event::Key(key) = event::read()? {
-            //    match key.code {
-            //        KeyCode::Char('q') => return Ok(()),
-            //        KeyCode::Up => menu.previous(),
-            //        KeyCode::Down => menu.next(),
-            //        _ => {}
-            //    }
-            //}
         }
 
         if last_tick.elapsed() >= tick_rate {

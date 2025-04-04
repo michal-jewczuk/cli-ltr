@@ -9,30 +9,33 @@ use tui::{
 use crossterm::event::{Event, KeyCode, KeyEvent};
 
 
-enum ScreenType {
+pub enum ScreenType {
     Home,
     Tests,
     Scores,
     Rerun,
     Help,
+    Quit,
 }
 
-pub struct App {
+pub struct App<'a> {
     is_finished: bool,
     current_screen: ScreenType,
+    home: home::Home<'a>,
 }
 
-impl App {
+impl App<'_> {
     pub fn new() -> Self {
         App { 
             is_finished: false,
             current_screen: ScreenType::Home,
+            home: home::Home::new(),
         }
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
         match self.current_screen {
-            ScreenType::Home => home::draw(f),
+            ScreenType::Home => self.home.draw(f),
             _ => {} 
         }
     }
@@ -59,7 +62,7 @@ impl App {
 
     fn handle_key_code(&mut self, code: KeyCode) -> Result<(), io::Error> {
         match self.current_screen {
-            ScreenType::Home => home::handle_key_code(self, code)?,
+            ScreenType::Home => self.current_screen = self.home.handle_key_code(code),
             _ => {}
         }
         Ok(())
