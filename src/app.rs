@@ -49,7 +49,6 @@ impl App<'_> {
             ScreenType::Rerun => self.rerun.draw(f),
             ScreenType::Help => self.help.draw(f),
             ScreenType::Quit => self.is_finished = true,
-            _ => {} 
         }
     }
 

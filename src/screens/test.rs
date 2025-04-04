@@ -1,11 +1,11 @@
 use crate::app::ScreenType;
+use crate::ui::layout;
 
 use tui::{
     backend::Backend,
-    layout::{Alignment, Constraint, Direction, Layout, Rect},
+    layout::{Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, Borders, List, ListItem, Paragraph, Wrap},
     Frame,
 };
 use crossterm::event::{KeyCode};
@@ -19,15 +19,10 @@ impl Tests {
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints([
-                Constraint::Percentage(10),
-                Constraint::Percentage(90)
-            ].as_ref())
-            .split(f.size());
+        let chunks = layout::get_basic_layout(f);
 
         self.render_header(f, chunks[0]);
+        self.render_navbar(f, chunks[1]);
     }
 
     pub fn handle_key_code(&mut self, code: KeyCode) -> ScreenType {
@@ -47,13 +42,16 @@ impl Tests {
                 Span::raw("Run tests")
             ]),
         ];
-        let header = Paragraph::new(text)
-            .block(Block::default())
-            .style(Style::default().fg(Color::White).bg(Color::DarkGray))
-            .alignment(Alignment::Center)
-            .wrap(Wrap { trim: true });
+        let header = layout::get_header(text);
     
         f.render_widget(header, area);
+    }
+
+    fn render_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
+        let text = vec![("[b]", " Home "), ("[q]", " Quit ")];
+        let navbar = layout::get_navbar(text);
+
+        f.render_widget(navbar, area);
     }
 }
 
