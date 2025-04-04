@@ -57,6 +57,10 @@ fn run_app<B: Backend>(
             }
         }
 
+        if app.is_done() {
+            return Ok(());
+        }
+
         if last_tick.elapsed() >= tick_rate {
             last_tick = Instant::now();
         }

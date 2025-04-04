@@ -1,7 +1,6 @@
 use crate::app::ScreenType;
 use crate::ui::menu::Menu;
 
-use std::io;
 use tui::{
     backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
@@ -40,15 +39,23 @@ impl<'a> Home<'a> {
         match code {
             KeyCode::Up => self.menu.previous(),
             KeyCode::Down => self.menu.next(),
-            KeyCode::Enter => {
-                println!("ENTER");
-                // tmp solution
-                // return type depends on current menu pos
-                return ScreenType::Home;
-            },
+            KeyCode::Enter => return self.handle_enter(),
             _ => {} 
         }
         ScreenType::Home
+    }
+
+    fn handle_enter(&mut self) -> ScreenType {
+        match self.menu.state.selected() {
+            Some(screen) => {
+                match screen {
+                    0 => ScreenType::Tests,
+                    4 => ScreenType::Quit,
+                    _ => ScreenType::Home
+                }
+            },
+            None => ScreenType::Home
+        }
     }
 
     fn render_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {

@@ -1,5 +1,5 @@
 
-use crate::screens::home;
+use crate::screens::{home, test};
 
 use std::io;
 use tui::{
@@ -22,6 +22,7 @@ pub struct App<'a> {
     is_finished: bool,
     current_screen: ScreenType,
     home: home::Home<'a>,
+    tests: test::Tests,
 }
 
 impl App<'_> {
@@ -30,12 +31,15 @@ impl App<'_> {
             is_finished: false,
             current_screen: ScreenType::Home,
             home: home::Home::new(),
+            tests: test::Tests::new(),
         }
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
         match self.current_screen {
             ScreenType::Home => self.home.draw(f),
+            ScreenType::Tests => self.tests.draw(f),
+            ScreenType::Quit => self.is_finished = true,
             _ => {} 
         }
     }
@@ -63,6 +67,7 @@ impl App<'_> {
     fn handle_key_code(&mut self, code: KeyCode) -> Result<(), io::Error> {
         match self.current_screen {
             ScreenType::Home => self.current_screen = self.home.handle_key_code(code),
+            ScreenType::Tests => self.current_screen = self.tests.handle_key_code(code),
             _ => {}
         }
         Ok(())
