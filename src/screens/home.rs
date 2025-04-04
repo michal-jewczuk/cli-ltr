@@ -1,6 +1,7 @@
-
+use crate::app::App;
 use crate::ui::menu::Menu;
 
+use std::io;
 use tui::{
     backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
@@ -9,9 +10,10 @@ use tui::{
     widgets::{Block, Borders, List, ListItem, Paragraph, Wrap},
     Frame,
 };
+use crossterm::event::{KeyCode};
 
 
-pub fn ui<B: Backend>(f: &mut Frame<B>, menu: &mut Menu) {
+pub fn draw<B: Backend>(f: &mut Frame<B>) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -21,9 +23,21 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, menu: &mut Menu) {
         ].as_ref())
         .split(f.size());
 
+    let mut menu = Menu::home();
+
     render_header(f, chunks[0]);
     render_menu_instructions(f, chunks[1]);
-    render_menu(f, chunks[2], menu);
+    render_menu(f, chunks[2], &mut menu);
+}
+
+pub fn handle_key_code(app: &mut App, code: KeyCode) -> Result<(), io::Error> {
+    match code {
+        KeyCode::Up => println!("Up pressed"),
+        KeyCode::Down => println!("Down pressed"),
+        KeyCode::Enter => println!("Enter pressed"),
+        _ => {}
+    }
+    Ok(())
 }
 
 fn render_header<B: Backend>(f: &mut Frame<B>, area: Rect) {

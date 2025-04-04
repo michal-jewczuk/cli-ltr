@@ -1,6 +1,4 @@
-
-use crate::ui::menu;
-use crate::screens::home;
+use crate::app::App;
 
 use std::{io, time::{Duration, Instant}};
 use tui::{
@@ -8,7 +6,7 @@ use tui::{
     Terminal
 };
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::{self, DisableMouseCapture, EnableMouseCapture},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -23,11 +21,8 @@ pub fn run() -> Result<(), io::Error> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    // tmp
-    let mut menu = menu::Menu::home();
-
     // TODO add refresh rate as parameter
-    let result = run_app(&mut terminal, &mut menu, Duration::from_millis(250));
+    let result = run_app(&mut terminal, Duration::from_millis(250));
 
     //restore terminal
     disable_raw_mode()?;
@@ -43,28 +38,33 @@ pub fn run() -> Result<(), io::Error> {
 }
 
 fn run_app<B: Backend>(
-    terminal: &mut Terminal<B>,
-    menu: &mut menu::Menu,
-    tick_rate: Duration,
+        terminal: &mut Terminal<B>,
+        tick_rate: Duration,
     ) -> Result<(), io::Error> {
 
     let mut last_tick = Instant::now();
+    let mut app = App::new();
     loop {
-        terminal.draw(|f| home::ui(f, menu))?;
+        //terminal.draw(|f| home::ui(f, menu))?;
+        terminal.draw(|f| app.draw(f))?;
 
-        //let timeout = tick_rate
-        //    .checked_sub(last_tick.elapsed())
-        //    .unwrap_or_else(|| Duration::from_secs(0));
+        let timeout = tick_rate
+            .checked_sub(last_tick.elapsed())
+            .unwrap_or_else(|| Duration::from_secs(0));
 
-        if crossterm::event::poll(Duration::from_millis(50))? {
-            if let Event::Key(key) = event::read()? {
-                match key.code {
-                    KeyCode::Char('q') => return Ok(()),
-                    KeyCode::Up => menu.previous(),
-                    KeyCode::Down => menu.next(),
-                    _ => {}
-                }
+        if crossterm::event::poll(timeout)? {
+            app.on_terminal_event(event::read()?);
+            if app.is_done() {
+                return Ok(());
             }
+            //if let Event::Key(key) = event::read()? {
+            //    match key.code {
+            //        KeyCode::Char('q') => return Ok(()),
+            //        KeyCode::Up => menu.previous(),
+            //        KeyCode::Down => menu.next(),
+            //        _ => {}
+            //    }
+            //}
         }
 
         if last_tick.elapsed() >= tick_rate {
