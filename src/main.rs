@@ -3,6 +3,8 @@ mod app;
 
 mod screens;
 mod ui;
+mod models;
+mod service;
 
 use std::io;
 

@@ -1,5 +1,6 @@
 
 use crate::screens::{help, home, rerun, results, test};
+use crate::service::testservice;
 
 use std::io;
 use tui::{
@@ -30,16 +31,12 @@ pub struct App<'a> {
 
 impl App<'_> {
     pub fn new() -> Self {
-        let to_do = vec![
-            ("xyz", "[2025-03-07]: English idioms with twist"),
-            ("abc", "[2025-02-28]: Verbs and stuff"),
-            ("cde", "[2025-02-27]: Week exam #2"),
-        ];
+	let tests_to_do = testservice::get_to_do();
         App { 
             is_finished: false,
             current_screen: ScreenType::Home,
             home: home::Home::new(),
-            tests: test::Tests::new(to_do),
+            tests: test::Tests::new(tests_to_do),
             results: results::Results::new(),
             rerun: rerun::Rerun::new(),
             help: help::Help::new(),
@@ -88,8 +85,5 @@ impl App<'_> {
         }
         Ok(())
     }
-
 }
-
-
 
