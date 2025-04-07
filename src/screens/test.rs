@@ -31,23 +31,23 @@ impl<'a> Tests<'a> {
         self.render_test_items(f, chunks[2]);
     }
 
-    pub fn handle_key_code(&mut self, code: KeyCode) -> ScreenType {
+    pub fn handle_key_code(&mut self, code: KeyCode) -> (ScreenType, String) {
         match code {
-            KeyCode::Char('b') | KeyCode::Char('B') => return ScreenType::Home,
+            KeyCode::Char('b') | KeyCode::Char('B') => return (ScreenType::Home, String::from("")),
             KeyCode::Up => self.list.previous(),
             KeyCode::Down => self.list.next(),
             KeyCode::Enter => return self.handle_enter(),
             _ => {}
         } 
-        ScreenType::Tests
+        (ScreenType::Tests, String::from("")) 
     }
 
-    fn handle_enter(&mut self) -> ScreenType {
+    fn handle_enter(&mut self) -> (ScreenType, String) {
         match self.list.state.selected() {
             Some(idx) => {
-                ScreenType::Runner
+                (ScreenType::Runner, self.items[idx].0.to_string())
             },
-            None => ScreenType::Tests
+            None => (ScreenType::Tests, String::from(""))
         }
     }
 

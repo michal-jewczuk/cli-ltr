@@ -18,6 +18,49 @@ pub fn get_basic_layout<B: Backend>(f: &mut Frame<B>) -> Vec<Rect> {
         .split(f.size())
 }
 
+pub fn get_two_row_layout<B: Backend>(f: &mut Frame<B>, first: u16) -> Vec<Rect> {
+    Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage(first),
+            Constraint::Percentage(100 - first)
+            ].as_ref())
+        .split(f.size())
+}
+
+pub fn get_two_row_layout_rect(f: Rect, first: u16) -> Vec<Rect> {
+    Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage(first),
+            Constraint::Percentage(100 - first)
+            ].as_ref())
+        .split(f)
+}
+
+pub fn get_three_row_layout_rect(f: Rect, first: u16, second: u16) -> Vec<Rect> {
+    Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage(first),
+            Constraint::Percentage(second),
+            Constraint::Percentage(100 - first - second)
+            ].as_ref())
+        .split(f)
+}
+
+pub fn get_three_col_layout_rect(f: Rect, middle: u16) -> Vec<Rect> {
+    let side = (100 - middle) / 2;
+    Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(side),
+            Constraint::Percentage(middle),
+            Constraint::Percentage(side)
+            ].as_ref())
+        .split(f)
+}
+
 pub fn create_navigable_list<'a>(items: Vec<&'a str>) -> List<'a> {
     let list_items: Vec<ListItem> = items.iter()
         .map(|&i| ListItem::new(i))
@@ -31,6 +74,14 @@ pub fn create_navigable_list<'a>(items: Vec<&'a str>) -> List<'a> {
             .add_modifier(Modifier::BOLD)
             )
         .highlight_symbol(">> ")
+}
+
+pub fn get_par_with_colors(text: Vec<Spans>, fg: Color, bg: Color) -> Paragraph {
+    Paragraph::new(text)
+        .block(Block::default())
+        .style(Style::default().fg(fg).bg(bg))
+        .alignment(Alignment::Center)
+        .wrap(Wrap { trim: true })
 }
 
 pub fn get_header(text: Vec<Spans>) -> Paragraph {
@@ -59,6 +110,22 @@ pub fn get_navbar<'a>(text: Vec<(&'a str, &'a str)>) -> Paragraph<'a> {
     Paragraph::new(spans)
         .block(Block::default())
         .style(Style::default().bg(Color::Magenta))
+        .alignment(Alignment::Center)
+        .wrap(Wrap { trim: true })
+}
+
+pub fn get_test_start_row<'a>(text: Vec<(&'a str, &'a str)>) -> Paragraph<'a> {
+    let mut start: Vec<Span> = vec![];
+
+    text.iter().for_each(|t| {
+        start.push(get_navbar_element(t.0, true));
+        start.push(get_navbar_element(t.1, false));
+        start.push(Span::styled(" // ", Style::default().add_modifier(Modifier::BOLD)));
+    });
+    start.pop();
+    Paragraph::new(Spans::from(start))
+        .block(Block::default())
+        .style(Style::default().bg(Color::Blue))
         .alignment(Alignment::Center)
         .wrap(Wrap { trim: true })
 }

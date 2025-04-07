@@ -81,7 +81,18 @@ impl App<'_> {
     fn handle_key_code(&mut self, code: KeyCode) -> Result<(), io::Error> {
         match self.current_screen {
             ScreenType::Home => self.current_screen = self.home.handle_key_code(code),
-            ScreenType::Tests => self.current_screen = self.tests.handle_key_code(code),
+            //ScreenType::Tests => self.current_screen = self.tests.handle_key_code(code),
+            ScreenType::Tests => {
+                let (screen, test_id) = self.tests.handle_key_code(code);
+                match screen {
+                    ScreenType::Runner => {
+                        let test_model = testservice::get_by_id(test_id);
+                        self.runner = runner::Runner::new(test_model);
+                        self.current_screen = ScreenType::Runner;
+                    },
+                    _ => self.current_screen = ScreenType::Tests
+                }
+            },
             ScreenType::Results => self.current_screen = self.results.handle_key_code(code),
             ScreenType::Rerun => self.current_screen = self.rerun.handle_key_code(code),
             ScreenType::Runner => self.current_screen = self.runner.handle_key_code(code),
