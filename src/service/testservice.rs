@@ -5,15 +5,15 @@ use crate::models::test;
 
 pub fn get_to_do<'a>() -> Vec<(&'a str, &'a str)> {
     vec![
-        test::TestS {
+        test::TestModel {
             id: "xyz",
             title: "[2025-03-07] English idioms with twist",
         },
-        test::TestS {
+        test::TestModel {
             id: "abc",
             title: "[2025-02-28] Verbs and stuff",
         },
-        test::TestS {
+        test::TestModel {
             id: "cde",
             title: "[2025-02-27] Week exam #2",
         },

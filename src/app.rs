@@ -1,5 +1,5 @@
 
-use crate::screens::{help, home, rerun, results, test};
+use crate::screens::{help, home, rerun, results, runner, test};
 use crate::service::testservice;
 
 use std::io;
@@ -17,6 +17,7 @@ pub enum ScreenType {
     Rerun,
     Help,
     Quit,
+    Runner,
 }
 
 pub struct App<'a> {
@@ -27,6 +28,7 @@ pub struct App<'a> {
     results: results::Results,
     rerun: rerun::Rerun,
     help: help::Help,
+    runner: runner::Runner<'a>,
 }
 
 impl App<'_> {
@@ -40,6 +42,7 @@ impl App<'_> {
             results: results::Results::new(),
             rerun: rerun::Rerun::new(),
             help: help::Help::new(),
+            runner: runner::Runner::new(None),
         }
     }
 
@@ -50,6 +53,7 @@ impl App<'_> {
             ScreenType::Results => self.results.draw(f),
             ScreenType::Rerun => self.rerun.draw(f),
             ScreenType::Help => self.help.draw(f),
+            ScreenType::Runner => self.runner.draw(f),
             ScreenType::Quit => self.is_finished = true,
         }
     }
@@ -80,6 +84,7 @@ impl App<'_> {
             ScreenType::Tests => self.current_screen = self.tests.handle_key_code(code),
             ScreenType::Results => self.current_screen = self.results.handle_key_code(code),
             ScreenType::Rerun => self.current_screen = self.rerun.handle_key_code(code),
+            ScreenType::Runner => self.current_screen = self.runner.handle_key_code(code),
             ScreenType::Help => self.current_screen = self.help.handle_key_code(code),
             _ => {}
         }

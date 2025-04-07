@@ -36,9 +36,19 @@ impl<'a> Tests<'a> {
             KeyCode::Char('b') | KeyCode::Char('B') => return ScreenType::Home,
             KeyCode::Up => self.list.previous(),
             KeyCode::Down => self.list.next(),
+            KeyCode::Enter => return self.handle_enter(),
             _ => {}
         } 
         ScreenType::Tests
+    }
+
+    fn handle_enter(&mut self) -> ScreenType {
+        match self.list.state.selected() {
+            Some(idx) => {
+                ScreenType::Runner
+            },
+            None => ScreenType::Tests
+        }
     }
 
     fn render_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {

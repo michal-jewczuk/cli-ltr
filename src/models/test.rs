@@ -1,15 +1,15 @@
 #[derive(Clone)]
-pub struct TestS<'a> {
+pub struct TestModel<'a> {
     pub id: &'a str,
     pub title: &'a str,
 }
 
-impl<'a> TestS<'a> {
+impl<'a> TestModel<'a> {
     pub fn new(
         id: &'a str,
         title: &'a str,
     ) -> Self {
-        TestS {
+        TestModel {
             id: id,
             title: title,
         }
