@@ -63,7 +63,7 @@ impl<'a> Home<'a> {
 
     fn render_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let header_border = Spans::from(Span::raw("==========================="));
-        let text_all = vec![
+        let mut text = vec![
             Spans::from(Span::raw("")),
             header_border.clone(),
             Spans::from(vec![
@@ -74,9 +74,8 @@ impl<'a> Home<'a> {
             header_border.clone(),
             Spans::from(Span::raw("")),
         ];
-        let mut text = text_all.clone();
         if area.height < 5 {
-            text = text_all[1..4].to_vec();
+            text = text[1..4].to_vec();
         }
 
         let header = Paragraph::new(text)
@@ -89,14 +88,13 @@ impl<'a> Home<'a> {
     }
 
     fn render_menu_instructions<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let text_all = vec![
+        let mut text = vec![
             Spans::from(Span::raw("")),
             Spans::from(Span::raw("You can use UP or DOWN arrows to navigate through menu items and ENTER to confirm")),
             Spans::from(Span::raw("or you can use the specified key shortcut to instantly confirm")),
         ];
-        let mut text = text_all.clone();
         if area.height < 6 {
-            text = text_all[1..3].to_vec();
+            text = text[1..3].to_vec();
         }
         let instructions = Paragraph::new(text)
             .block(Block::default().borders(Borders::TOP | Borders::BOTTOM))
