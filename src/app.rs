@@ -72,7 +72,12 @@ impl App<'_> {
 
     fn on_key_event(&mut self, event: KeyEvent) -> Result<(), io::Error> {
         match event.code {
-            KeyCode::Char('q') | KeyCode::Char('Q') => self.is_finished = true,
+            KeyCode::Char('q') | KeyCode::Char('Q') => {
+                // will not work while test is on
+                if !self.runner.is_running() {
+                    self.is_finished = true
+                }
+            },
             other_code => self.handle_key_code(other_code)?
         }
         Ok(())
@@ -81,7 +86,6 @@ impl App<'_> {
     fn handle_key_code(&mut self, code: KeyCode) -> Result<(), io::Error> {
         match self.current_screen {
             ScreenType::Home => self.current_screen = self.home.handle_key_code(code),
-            //ScreenType::Tests => self.current_screen = self.tests.handle_key_code(code),
             ScreenType::Tests => {
                 let (screen, test_id) = self.tests.handle_key_code(code);
                 match screen {
