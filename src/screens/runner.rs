@@ -1,6 +1,6 @@
 use crate::app::ScreenType;
 use crate::ui::{layout, menu::Menu};
-use crate::models::test::TestModel;
+use crate::models::test::{TestModel, QuestionModel};
 
 use tui::{
     backend::Backend,
@@ -13,11 +13,11 @@ use crossterm::event::{KeyCode};
 
 pub struct Runner<'a> {
     item: Option<TestModel<'a>>,
-    current_q_number: u16,
+    current_q_number: usize,
     current_q_text: &'a str,
     current_q_answers: Menu<'a>,
     answers_record: Vec<Option<usize>>,
-    question_count: u16,
+    question_count: usize,
     show_summary: bool,
 }
 
@@ -95,15 +95,17 @@ impl<'a> Runner<'a> {
     }
 
     fn start_test(&mut self) -> ScreenType {
+        // TODO check when test has 0 questions
+        // how to handle that so the user can see?
+        // not allow to have that test shown on list?
+
+
         self.current_q_number = 1;
-        self.current_q_text = "Lets imagine that you see your brother for the first time today and it is 1 pm. How do you greet him?";
-        let answers_p: Vec<&str> = vec![
-            "Good evening",
-            "Good morning",
-            "Hi, do we know each other?",
-            "Yo bro, shouldn't you be in Buenos Aires right now?"
-        ];
-        self.current_q_answers = Menu::new(answers_p);
+
+        // should here be a None check?
+        let tmp_test = self.item.clone().unwrap();
+        self.current_q_text = tmp_test.questions[0].question;
+        self.current_q_answers = Menu::new(tmp_test.questions[0].answers.clone());
         self.answers_record = vec![];
 
         ScreenType::Runner
@@ -121,17 +123,12 @@ impl<'a> Runner<'a> {
                 self.show_summary = true;
             } else {
                 // next question
+                let tmp_test = self.item.clone().unwrap();
+                self.current_q_text = tmp_test.questions[self.current_q_number].question;
+                self.current_q_answers = Menu::new(tmp_test.questions[self.current_q_number].answers.clone());
                 self.current_q_number += 1;
-                self.current_q_text = "This is the ... I am telling you this!";
-                self.current_q_answers = Menu::new(vec![
-                    "current time",
-                    "previous time",
-                    "last time",
-                    "any timme",
-                ]);
             }
         }
-
         ScreenType::Runner
     }
 
