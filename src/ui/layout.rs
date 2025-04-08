@@ -3,7 +3,7 @@ use tui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, Borders, List, ListItem, Paragraph, Wrap},
+    widgets::{Block, Borders, BorderType, List, ListItem, Paragraph, Wrap},
     Frame,
 };
 
@@ -138,3 +138,16 @@ fn get_navbar_element(text: &str, primary: bool) -> Span {
     }
 }
 
+pub fn render_question<'a>(text: &'a str) -> Paragraph<'a> {
+    Paragraph::new(vec![
+        Spans::from(Span::raw("")),
+        Spans::from(Span::from(text)),
+    ])
+        .block(Block::default()
+            .title("Question")
+            .borders(Borders::ALL)
+            .border_type(BorderType::Double))
+        .style(Style::default().bg(Color::Black))
+        .alignment(Alignment::Left)
+        .wrap(Wrap { trim: true })
+}
