@@ -48,8 +48,13 @@ impl<'a> Runner<'a> {
                 }
                 return ScreenType::Tests;
             }
-            // just a safeguard
-            KeyCode::Char('p') => return ScreenType::Quit,
+            // a safeguard
+            // should have a confirmation dialog
+            KeyCode::Char('P') => {
+                if self.is_running() {
+                    return ScreenType::Quit
+                }
+            },
             KeyCode::Char('s') | KeyCode::Char('S') => return self.start_test(),
             KeyCode::Enter => return self.handle_enter(),
             _ => {}

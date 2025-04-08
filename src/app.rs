@@ -94,7 +94,7 @@ impl App<'_> {
                         self.runner = runner::Runner::new(test_model);
                         self.current_screen = ScreenType::Runner;
                     },
-                    _ => self.current_screen = ScreenType::Tests
+                    _ => self.current_screen = screen 
                 }
             },
             ScreenType::Results => self.current_screen = self.results.handle_key_code(code),
