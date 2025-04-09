@@ -1,6 +1,9 @@
 use crate::app::ScreenType;
 use crate::ui::{layout, menu::Menu};
-use crate::models::test::{TestModel, QuestionModel};
+use crate::models::test::{
+	   TestModel, QuestionModel,
+	   ResultModel, AnswerModel,
+        };
 
 use tui::{
     backend::Backend,
@@ -53,6 +56,7 @@ impl<'a> Runner<'a> {
                 let chunks = layout::get_two_row_layout(f, 20);
 
                 self.render_summary_header(f, chunks[0]);
+		self.render_summary_body(f, chunks[1]);
             } else {
                 let chunks = layout::get_two_row_layout(f, 20);
 
@@ -188,6 +192,29 @@ impl<'a> Runner<'a> {
         ];
         let header = layout::get_header(text);
         f.render_widget(header, area);
+    }
+
+    fn render_summary_body<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
+	// will be created after every question answered
+	let q_list = self.item.clone().unwrap().questions;
+	let mut answer_list: Vec<AnswerModel> = vec![];
+	for i in 0..self.question_count {
+	    let q_text = q_list[i].question;
+	    let correct_a = q_list[i].correct;
+	    let given = self.answers_record[i];
+	    let is_correct = q_list[i].is_correct(self.answers_record[i]);
+	    let time = 10;
+	    let answer = AnswerModel::new(q_text, correct_a, given,
+		is_correct, time);
+	    answer_list.push(answer);
+	}		
+
+	// change to table
+	let text: Vec<Spans> = answer_list.iter()
+	    .map(|a| Spans::from(Span::raw(format!("{:#?}", a))))
+	    .collect();
+	let header = layout::get_header(text);
+	f.render_widget(header, area);
     }
 }
 
