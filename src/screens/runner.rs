@@ -214,7 +214,9 @@ impl<'a> Runner<'a> {
 	    .map(|a| Spans::from(Span::raw(format!("{:#?}", a))))
 	    .collect();
 	let header = layout::get_header(text);
-	f.render_widget(header, area);
+        let cols = layout::get_three_col_layout_rect(area, 60);
+        let table = layout::render_summary_table(answer_list.clone());
+	f.render_widget(table, cols[1]);
     }
 }
 

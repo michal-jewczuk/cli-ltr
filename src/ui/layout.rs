@@ -1,9 +1,11 @@
+use crate::models::test::AnswerModel;
+
 use tui::{
     backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, Borders, BorderType, List, ListItem, Paragraph, Wrap},
+    widgets::{Block, Borders, BorderType, Cell, List, ListItem, Paragraph, Row, Table, Wrap},
     Frame,
 };
 
@@ -151,3 +153,38 @@ pub fn render_question<'a>(text: &'a str) -> Paragraph<'a> {
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true })
 }
+
+pub fn render_summary_table<'a>(answers: Vec<AnswerModel<'a>>) -> Table<'a> {
+    let mut idx = 0;
+    let rows: Vec<Row> = answers.iter()
+        .map(|a| {
+            let mut correct = "No";
+            if a.is_correct {
+                correct = "Yes"
+            }
+            idx += 1;
+            (format!("{:?}", idx), a.question.to_string(), correct.to_string())
+        })
+        .map(|t| Row::new(vec![t.0, t.1, t.2]).height(2))
+        .collect();
+
+    Table::new(rows)
+        .style(Style::default())
+        .header(
+            Row::new(vec!["Number", "Question", "Correct"])
+            .style(Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::White)
+                .bg(Color::Blue)
+                )
+            .bottom_margin(1)
+        ) 
+        .block(Block::default())
+        .widths(&[
+            Constraint::Percentage(10), 
+            Constraint::Percentage(65), 
+            Constraint::Percentage(25)
+        ])
+        .column_spacing(1)
+}
+
