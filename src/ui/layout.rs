@@ -163,15 +163,27 @@ pub fn render_summary_table<'a>(answers: Vec<AnswerModel<'a>>) -> Table<'a> {
                 correct = "Yes"
             }
             idx += 1;
-            (format!("{:?}", idx), a.question.to_string(), correct.to_string())
+            (format!(" #{:?}", idx), a.question.to_string(), correct.to_string())
         })
-        .map(|t| Row::new(vec![t.0, t.1, t.2]).height(2))
+        .map(|t| {
+	    let mut color = Color::Red;
+	    if t.2 == "Yes" {
+        	color = Color::Green;
+	    }
+	    let result = Spans::from(vec![Span::raw(" "), Span::raw(t.2)]);
+	    Row::new(vec![
+		Cell::from(t.0).style(Style::default().bg(color)),
+		Cell::from(t.1).style(Style::default().bg(color)),
+		Cell::from(result).style(Style::default().bg(color)),
+	    ]).height(1)
+	    .bottom_margin(1)
+	})
         .collect();
 
     Table::new(rows)
         .style(Style::default())
         .header(
-            Row::new(vec!["Number", "Question", "Correct"])
+            Row::new(vec![" Number", " Question", " Correct"])
             .style(Style::default()
                 .add_modifier(Modifier::BOLD)
                 .fg(Color::White)
