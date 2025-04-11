@@ -6,21 +6,28 @@ use tui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, Borders, List, ListItem, Paragraph, Wrap},
+    widgets::{Block, Borders, Clear, Paragraph, Wrap},
     Frame,
 };
 use crossterm::event::{KeyCode};
 
 pub struct Home<'a> {
+    pub first_render: bool,
     menu: Menu<'a>,
 }
 
 impl<'a> Home<'a> {
     pub fn new() -> Self {
-        Home { menu: Menu::home() }
+        Home { first_render: true, menu: Menu::home() }
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
+        if self.first_render {
+            self.first_render = false;
+            f.render_widget(Clear, f.size());
+            return;
+        }
+
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints([

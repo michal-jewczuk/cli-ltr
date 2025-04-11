@@ -6,23 +6,32 @@ use tui::{
     layout::{Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
+    widgets::Clear,
     Frame,
 };
 use crossterm::event::{KeyCode};
 
 pub struct Results {
+    pub first_render: bool,
 }
 
 impl Results {
     pub fn new() -> Self {
-        Results {}
+        Results {first_render: true}
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
-        let chunks = layout::get_basic_layout(f);
+        if self.first_render {
+            self.first_render = false;
+            f.render_widget(Clear, f.size());
+            return;
+        }
+
+        let chunks = layout::get_three_row_layout_rect(f.size(), 15, 10);
 
         self.render_header(f, chunks[0]);
         self.render_navbar(f, chunks[1]);
+        self.render_content(f, chunks[2]);
     }
 
     pub fn handle_key_code(&mut self, code: KeyCode) -> ScreenType {
@@ -52,6 +61,15 @@ impl Results {
         let navbar = layout::get_navbar(text);
 
         f.render_widget(navbar, area);
+    }
+
+    fn render_content<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
+        let text = vec![
+            Spans::from(Span::raw("Content")),
+        ];
+        let content = layout::get_header(text);
+
+        f.render_widget(content, area);
     }
 
 }

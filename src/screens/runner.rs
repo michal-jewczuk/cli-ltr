@@ -10,11 +10,13 @@ use tui::{
     layout::{Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
+    widgets::Clear,
     Frame,
 };
 use crossterm::event::{KeyCode};
 
 pub struct Runner<'a> {
+    pub first_render: bool,
     item: Option<TestModel<'a>>,
     current_q_number: usize,
     current_q_text: &'a str,
@@ -27,6 +29,7 @@ pub struct Runner<'a> {
 impl<'a> Runner<'a> {
     pub fn new(item: Option<TestModel<'a>>) -> Self {
          Runner {
+             first_render: true,
              item, 
              current_q_number: 0,
              current_q_text: "",
@@ -46,6 +49,12 @@ impl<'a> Runner<'a> {
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
+        if self.first_render {
+            self.first_render = false;
+            f.render_widget(Clear, f.size());
+            return;
+        }
+
         if self.is_running() {
             let chunks = layout::get_two_row_layout(f, 20);
 
@@ -53,10 +62,11 @@ impl<'a> Runner<'a> {
             self.render_answers(f, chunks[1]);
         } else {
             if self.show_summary {
-                let chunks = layout::get_two_row_layout(f, 20);
+                let chunks = layout::get_three_row_layout_rect(f.size(), 10, 10);
 
                 self.render_summary_header(f, chunks[0]);
-		self.render_summary_body(f, chunks[1]);
+                self.render_summary_navbar(f, chunks[1]);
+		self.render_summary_body(f, chunks[2]);
             } else {
                 let chunks = layout::get_two_row_layout(f, 20);
 
@@ -66,19 +76,19 @@ impl<'a> Runner<'a> {
         }
     }
 
-    pub fn handle_key_code(&mut self, code: KeyCode) -> ScreenType {
+    pub fn handle_key_code(&mut self, code: KeyCode) -> (ScreenType, Option<String>) {
         match code {
             KeyCode::Char('b') | KeyCode::Char('B') => {
                 if self.is_running() {
-                    return ScreenType::Runner
+                    return (ScreenType::Runner, None)
                 }
-                return ScreenType::Tests;
+                return (ScreenType::Tests, None);
             }
             // a safeguard
             // should have a confirmation dialog
             KeyCode::Char('P') => {
                 if self.is_running() {
-                    return ScreenType::Quit
+                    return (ScreenType::Quit, None);
                 }
             },
             KeyCode::Char('s') | KeyCode::Char('S') => return self.start_test(),
@@ -92,19 +102,26 @@ impl<'a> Runner<'a> {
                     self.current_q_answers.next()
                 }
             },
+            KeyCode::Char('d') | KeyCode::Char('D') => {
+                if self.show_summary {
+                    self.show_summary = false;
+                    return (ScreenType::Results, None);
+                }
+            },
             KeyCode::Enter => return self.handle_enter(),
             _ => {}
         } 
-        ScreenType::Runner
+        (ScreenType::Runner, None)
     }
 
-    fn start_test(&mut self) -> ScreenType {
+    fn start_test(&mut self) -> (ScreenType, Option<String>) {
         // TODO check when test has 0 questions
         // how to handle that so the user can see?
         // not allow to have that test shown on list?
 
 
         self.current_q_number = 1;
+        self.show_summary = false;
 
         // should here be a None check?
         let tmp_test = self.item.clone().unwrap();
@@ -112,14 +129,12 @@ impl<'a> Runner<'a> {
         self.current_q_answers = Menu::new(tmp_test.questions[0].answers.clone());
         self.answers_record = vec![];
 
-        ScreenType::Runner
+        (ScreenType::Runner, None)
     }
 
-    fn handle_enter(&mut self) -> ScreenType {
+    fn handle_enter(&mut self) -> (ScreenType, Option<String>) {
         if self.is_running() {
             self.answers_record.push(self.current_q_answers.state.selected());
-            //println!("Chosen answer: {:?}", self.current_q_answers.state.selected());
-            //println!("Answers record: {:#?}", self.answers_record);
 
             if self.current_q_number == self.question_count {
                 // test over, show summary
@@ -133,7 +148,7 @@ impl<'a> Runner<'a> {
                 self.current_q_number += 1;
             }
         }
-        ScreenType::Runner
+        (ScreenType::Runner, None)
     }
 
     fn render_test_name<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
@@ -173,25 +188,32 @@ impl<'a> Runner<'a> {
     fn render_question<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let cols = layout::get_three_col_layout_rect(area, 60);
         let question_l = layout::render_question(self.current_q_text); 
+
         f.render_widget(question_l, cols[1]);
     }
 
     fn render_answers<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let cols = layout::get_three_col_layout_rect(area, 60);
         let answers_l = layout::create_navigable_list(self.current_q_answers.items.clone());
+
         f.render_stateful_widget(answers_l, cols[1], &mut self.current_q_answers.state);
     }
 
     fn render_summary_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let cols = layout::get_three_col_layout_rect(area, 60);
         let text = vec![
             Spans::from(vec![
-                Span::styled("Test done.", Style::default().add_modifier(Modifier::BOLD)),
+                Span::styled("Test summary", Style::default().add_modifier(Modifier::BOLD)),
             ]),
-            Spans::from(Span::raw("Here are your results:")),
         ];
         let header = layout::get_header(text);
         f.render_widget(header, area);
+    }
+
+    fn render_summary_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
+        let text = vec![("[d]", " Detailed results "), ("[b]", " Back to tests "), ("[q]", " Quit ")];
+        let navbar = layout::get_navbar(text);
+
+        f.render_widget(navbar, area);
     }
 
     fn render_summary_body<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
@@ -209,11 +231,6 @@ impl<'a> Runner<'a> {
 	    answer_list.push(answer);
 	}		
 
-	// change to table
-	let text: Vec<Spans> = answer_list.iter()
-	    .map(|a| Spans::from(Span::raw(format!("{:#?}", a))))
-	    .collect();
-	let header = layout::get_header(text);
         let cols = layout::get_three_col_layout_rect(area, 60);
         let table = layout::render_summary_table(answer_list.clone());
 	f.render_widget(table, cols[1]);

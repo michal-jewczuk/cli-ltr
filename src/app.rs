@@ -99,7 +99,16 @@ impl App<'_> {
             },
             ScreenType::Results => self.current_screen = self.results.handle_key_code(code),
             ScreenType::Rerun => self.current_screen = self.rerun.handle_key_code(code),
-            ScreenType::Runner => self.current_screen = self.runner.handle_key_code(code),
+            ScreenType::Runner => {
+                let (screen, test_id) = self.runner.handle_key_code(code);
+                match screen {
+                    ScreenType::Results => {
+                        println!("{:#?}", test_id);
+                        self.current_screen = ScreenType::Results
+                    },
+                    _ => self.current_screen = screen
+                }
+            },
             ScreenType::Help => self.current_screen = self.help.handle_key_code(code),
             _ => {}
         }

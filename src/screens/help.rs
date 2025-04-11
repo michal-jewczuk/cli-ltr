@@ -6,19 +6,26 @@ use tui::{
     layout::{Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
+    widgets::Clear,
     Frame,
 };
 use crossterm::event::{KeyCode};
 
 pub struct Help {
+    pub first_render: bool,
 }
 
 impl Help {
     pub fn new() -> Self {
-        Help {}
+        Help {first_render: true}
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
+        if self.first_render {
+            self.first_render = false;
+            f.render_widget(Clear, f.size());
+            return;
+        }
         let chunks = layout::get_basic_layout(f);
 
         self.render_header(f, chunks[0]);
