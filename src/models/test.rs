@@ -50,7 +50,7 @@ impl<'a> QuestionModel<'a> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ResultModel<'a> {
     pub answers: Vec<AnswerModel<'a>>,
     pub total_time: usize,

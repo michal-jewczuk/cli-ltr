@@ -21,21 +21,25 @@ pub struct Runner<'a> {
     current_q_number: usize,
     current_q_text: &'a str,
     current_q_answers: Menu<'a>,
-    answers_record: Vec<Option<usize>>,
+    result: ResultModel<'a>,
     question_count: usize,
     show_summary: bool,
 }
 
 impl<'a> Runner<'a> {
     pub fn new(item: Option<TestModel<'a>>) -> Self {
+         let mut question_count = 0; 
+         if !item.is_none() {
+             question_count = item.clone().unwrap().questions.len();
+         }
          Runner {
              first_render: true,
              item, 
              current_q_number: 0,
              current_q_text: "",
              current_q_answers: Menu::new(vec![]),
-             answers_record: vec![],
-             question_count: 2,
+             result: ResultModel::new(vec![], 0),
+             question_count, 
              show_summary: false,
          }
     }
@@ -76,7 +80,7 @@ impl<'a> Runner<'a> {
         }
     }
 
-    pub fn handle_key_code(&mut self, code: KeyCode) -> (ScreenType, Option<String>) {
+    pub fn handle_key_code(&mut self, code: KeyCode) -> (ScreenType, Option<ResultModel>) {
         match code {
             KeyCode::Char('b') | KeyCode::Char('B') => {
                 if self.is_running() {
@@ -105,7 +109,7 @@ impl<'a> Runner<'a> {
             KeyCode::Char('d') | KeyCode::Char('D') => {
                 if self.show_summary {
                     self.show_summary = false;
-                    return (ScreenType::Results, None);
+                    return (ScreenType::Results, Some(self.result.clone()));
                 }
             },
             KeyCode::Enter => return self.handle_enter(),
@@ -114,32 +118,41 @@ impl<'a> Runner<'a> {
         (ScreenType::Runner, None)
     }
 
-    fn start_test(&mut self) -> (ScreenType, Option<String>) {
+    fn start_test(&mut self) -> (ScreenType, Option<ResultModel>) {
         // TODO check when test has 0 questions
         // how to handle that so the user can see?
         // not allow to have that test shown on list?
 
-
         self.current_q_number = 1;
         self.show_summary = false;
+        self.result = ResultModel::new(vec![], 0);
 
         // should here be a None check?
         let tmp_test = self.item.clone().unwrap();
         self.current_q_text = tmp_test.questions[0].question;
         self.current_q_answers = Menu::new(tmp_test.questions[0].answers.clone());
-        self.answers_record = vec![];
 
         (ScreenType::Runner, None)
     }
 
-    fn handle_enter(&mut self) -> (ScreenType, Option<String>) {
+    fn handle_enter(&mut self) -> (ScreenType, Option<ResultModel>) {
+        // TODO put question time
         if self.is_running() {
-            self.answers_record.push(self.current_q_answers.state.selected());
+            let q = self.item.clone().unwrap().questions[self.current_q_number - 1].clone();
+            let answer = AnswerModel::new(
+                    self.current_q_text,
+                    q.correct,
+                    self.current_q_answers.state.selected(),
+                    q.is_correct(self.current_q_answers.state.selected()),
+                    10
+                ); 
+            self.result.answers.push(answer);
 
             if self.current_q_number == self.question_count {
                 // test over, show summary
                 self.current_q_number = 0;
                 self.show_summary = true;
+                // TODO update test time
             } else {
                 // next question
                 let tmp_test = self.item.clone().unwrap();
@@ -206,6 +219,7 @@ impl<'a> Runner<'a> {
             ]),
         ];
         let header = layout::get_header(text);
+
         f.render_widget(header, area);
     }
 
@@ -217,22 +231,9 @@ impl<'a> Runner<'a> {
     }
 
     fn render_summary_body<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-	// will be created after every question answered
-	let q_list = self.item.clone().unwrap().questions;
-	let mut answer_list: Vec<AnswerModel> = vec![];
-	for i in 0..self.question_count {
-	    let q_text = q_list[i].question;
-	    let correct_a = q_list[i].correct;
-	    let given = self.answers_record[i];
-	    let is_correct = q_list[i].is_correct(self.answers_record[i]);
-	    let time = 10;
-	    let answer = AnswerModel::new(q_text, correct_a, given,
-		is_correct, time);
-	    answer_list.push(answer);
-	}		
-
         let cols = layout::get_three_col_layout_rect(area, 60);
-        let table = layout::render_summary_table(answer_list.clone());
+        let table = layout::render_summary_table(self.result.clone().answers);
+
 	f.render_widget(table, cols[1]);
     }
 }
