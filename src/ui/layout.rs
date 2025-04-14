@@ -154,7 +154,7 @@ pub fn render_question<'a>(text: &'a str) -> Paragraph<'a> {
         .wrap(Wrap { trim: true })
 }
 
-pub fn render_summary_table<'a>(answers: Vec<AnswerModel<'a>>) -> Table<'a> {
+pub fn render_summary_table<'a>(answers: Vec<AnswerModel>) -> Table<'a> {
     let mut idx = 0;
     let rows: Vec<Row> = answers.iter()
         .map(|a| {
@@ -198,5 +198,19 @@ pub fn render_summary_table<'a>(answers: Vec<AnswerModel<'a>>) -> Table<'a> {
             Constraint::Percentage(25)
         ])
         .column_spacing(1)
+}
+
+pub fn render_result_step_q<'a>(text: &'a str) -> Paragraph<'a> {
+    Paragraph::new(vec![
+        Spans::from(Span::raw("")),
+        Spans::from(Span::from(text))
+    ])
+        .block(Block::default()
+            .title("Question")
+            .borders(Borders::ALL)
+            .border_type(BorderType::Double))
+        .style(Style::default().bg(Color::Blue))
+        .alignment(Alignment::Left)
+        .wrap(Wrap { trim: true })
 }
 

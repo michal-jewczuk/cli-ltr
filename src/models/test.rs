@@ -51,35 +51,49 @@ impl<'a> QuestionModel<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub struct ResultModel<'a> {
-    pub answers: Vec<AnswerModel<'a>>,
+pub struct ResultModel {
+    pub id: String,
+    pub title: String,
+    pub answers: Vec<AnswerModel>,
     pub total_time: usize,
 }
 
-impl<'a> ResultModel<'a> {
-    pub fn new(answers: Vec<AnswerModel<'a>>, total_time: usize) -> Self {
-        ResultModel { answers, total_time }
+impl ResultModel {
+    pub fn new(
+        id: String,
+        title: String,
+        answers: Vec<AnswerModel>, 
+        total_time: usize
+        ) -> Self {
+        ResultModel { 
+            id,
+            title,
+            answers, 
+            total_time 
+        }
     }
 }
 
 #[derive(Clone, Debug)]
-pub struct AnswerModel<'a> {
-    pub question: &'a str,
+pub struct AnswerModel {
+    pub question: String,
+    pub answers: Vec<String>,
     pub correct: u8,
     pub given: Option<usize>,
     pub is_correct: bool,
     pub time: usize,
 }
 
-impl<'a> AnswerModel<'a> {
+impl AnswerModel {
     pub fn new(
-	question: &'a str,
+	question: String,
+        answers: Vec<String>,
 	correct: u8,
 	given: Option<usize>,
 	is_correct: bool,
 	time: usize,
     ) -> Self {
-	AnswerModel { question, correct, given, is_correct, time}
+	AnswerModel { question, answers, correct, given, is_correct, time}
     }
 }
 

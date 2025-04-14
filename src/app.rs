@@ -39,7 +39,7 @@ impl App<'_> {
             current_screen: ScreenType::Home,
             home: home::Home::new(),
             tests: test::Tests::new(tests_to_do),
-            results: results::Results::new(),
+            results: results::Results::new(None),
             rerun: rerun::Rerun::new(),
             help: help::Help::new(),
             runner: runner::Runner::new(None),
@@ -100,10 +100,10 @@ impl App<'_> {
             ScreenType::Results => self.current_screen = self.results.handle_key_code(code),
             ScreenType::Rerun => self.current_screen = self.rerun.handle_key_code(code),
             ScreenType::Runner => {
-                let (screen, test_id) = self.runner.handle_key_code(code);
+                let (screen, result) = self.runner.handle_key_code(code);
                 match screen {
                     ScreenType::Results => {
-                        println!("{:#?}", test_id);
+                        self.results = results::Results::new(result.clone());
                         self.current_screen = ScreenType::Results
                     },
                     _ => self.current_screen = screen

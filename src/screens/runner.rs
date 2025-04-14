@@ -21,7 +21,7 @@ pub struct Runner<'a> {
     current_q_number: usize,
     current_q_text: &'a str,
     current_q_answers: Menu<'a>,
-    result: ResultModel<'a>,
+    result: ResultModel,
     question_count: usize,
     show_summary: bool,
 }
@@ -38,7 +38,7 @@ impl<'a> Runner<'a> {
              current_q_number: 0,
              current_q_text: "",
              current_q_answers: Menu::new(vec![]),
-             result: ResultModel::new(vec![], 0),
+             result: ResultModel::new(String::from(""), String::from(""), vec![], 0),
              question_count, 
              show_summary: false,
          }
@@ -123,9 +123,14 @@ impl<'a> Runner<'a> {
         // how to handle that so the user can see?
         // not allow to have that test shown on list?
 
+        let test_m = self.item.clone().unwrap();
+
         self.current_q_number = 1;
         self.show_summary = false;
-        self.result = ResultModel::new(vec![], 0);
+        self.result = ResultModel::new(
+            String::from(test_m.id),
+            String::from(test_m.title),
+            vec![], 0);
 
         // should here be a None check?
         let tmp_test = self.item.clone().unwrap();
@@ -139,8 +144,12 @@ impl<'a> Runner<'a> {
         // TODO put question time
         if self.is_running() {
             let q = self.item.clone().unwrap().questions[self.current_q_number - 1].clone();
+            let answers = q.answers.iter()
+                .map(|&a| String::from(a))
+                .collect::<Vec<String>>();
             let answer = AnswerModel::new(
-                    self.current_q_text,
+                    String::from(self.current_q_text),
+                    answers,
                     q.correct,
                     self.current_q_answers.state.selected(),
                     q.is_correct(self.current_q_answers.state.selected()),
