@@ -1,6 +1,6 @@
 use crate::app::ScreenType;
 use crate::ui::layout;
-use crate::models::test::ResultModel;
+use crate::models::test::{AnswerModel, ResultModel};
 
 use tui::{
     backend::Backend,
@@ -16,37 +16,46 @@ pub struct Results {
     pub first_render: bool,
     item: Option<ResultModel>,
     show_details: bool,
+    current_q_idx: usize,
+    current_q: Option<AnswerModel>,
+    count_q: usize,
 }
 
 impl Results {
     pub fn new(item: Option<ResultModel>) -> Self {
         let mut show_details = true;
+        let mut count_q = 0;
         match item {
             None => show_details = false,
-            Some(_) => show_details = true,
+            Some(ref r) => count_q = r.answers.len(),
         }
         Results {
             first_render: true,
             item,
             show_details,
+            current_q_idx: 0,
+            current_q: None,
+            count_q,
         }
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
         if self.first_render {
+            if self.show_details {
+                self.handle_start();
+            }
             self.first_render = false;
             f.render_widget(Clear, f.size());
             return;
         }
 
-        let mut chunks = vec![]; 
         if self.show_details {
-            chunks = layout::get_two_row_layout_rect(f.size(), 10);
+            let chunks = layout::get_two_row_layout_rect(f.size(), 10);
 
             self.render_details_header(f, chunks[0]);
             self.render_details_body(f, chunks[1]);
         } else {
-            chunks = layout::get_three_row_layout_rect(f.size(), 15, 10);
+            let chunks = layout::get_three_row_layout_rect(f.size(), 15, 10);
 
             self.render_header(f, chunks[0]);
             self.render_navbar(f, chunks[1]);
@@ -57,13 +66,45 @@ impl Results {
     pub fn handle_key_code(&mut self, code: KeyCode) -> ScreenType {
         match code {
             KeyCode::Char('b') | KeyCode::Char('B') => return ScreenType::Home,
+            KeyCode::Right => self.handle_next(),
+            KeyCode::Left => self.handle_previous(),
             _ => {}
         } 
         ScreenType::Results
     }
 
+    fn handle_start(&mut self) {
+        self.current_q_idx = 0;
+        self.current_q = Some(self.item.clone().unwrap().answers[0].clone());
+    }
+
+    fn handle_next(&mut self) {
+        if !self.show_details {
+            return;
+        }
+
+        self.current_q_idx += 1;
+        if self.current_q_idx >= self.count_q {
+            self.current_q_idx = 0;
+        }
+        self.current_q = Some(self.item.clone().unwrap().answers[self.current_q_idx].clone());
+    }
+
+    fn handle_previous(&mut self) {
+        if !self.show_details {
+            return;
+        }
+
+        if self.current_q_idx == 0 {
+            self.current_q_idx = self.count_q - 1;
+        } else {
+            self.current_q_idx -= 1;
+        }
+        self.current_q = Some(self.item.clone().unwrap().answers[self.current_q_idx].clone());
+    }
+
     fn render_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let mut text = vec![
+        let text = vec![
             Spans::from(Span::raw("")),
             Spans::from(vec![
                 Span::styled("CLI LTR", Style::default().add_modifier(Modifier::BOLD)),
@@ -104,20 +145,37 @@ impl Results {
     }
 
     fn render_details_body<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let q = self.item.clone().unwrap().answers[0].clone();
-        let content = layout::render_result_step_q(q.question.as_str());
+        let q = self.current_q.clone().unwrap();
 
         let cols = layout::get_three_col_layout_rect(area, 80);
         let chunks = layout::get_three_row_layout_rect(cols[1], 10, 30);
 
+        let navbar_b = vec![
+            ("[RIGHT]", " Next "), ("[LEFT]", " Previous "), ("[b]", " Back to list "), ("[q]", " Quit "),
+        ];
+        let navbar = layout::get_navbar(navbar_b);
+        f.render_widget(navbar, chunks[0]);
+
+        let content = layout::render_result_step_q(q.question.as_str(), self.current_q_idx + 1, self.count_q);
         f.render_widget(content, chunks[1]);
 
+        let mut aidx = 0;
         let answers_spans = q.answers.iter()
-            .map(|a| Spans::from(Span::from(a.as_str())))
+            .map(|a| {
+                let mut color = Color::Black;
+                if aidx == q.given.unwrap() {
+                    color = Color::Red;
+                }
+                if aidx == q.correct.into() {
+                    color = Color::Green;
+                }
+                aidx += 1;
+                Spans::from(Span::styled(
+                        a.as_str(), 
+                        Style::default().bg(color).fg(Color::White)))
+            })
             .collect::<Vec<Spans>>();
-
         let answers_p = layout::get_header(answers_spans);
-
         f.render_widget(answers_p, chunks[2]);
     }
 }

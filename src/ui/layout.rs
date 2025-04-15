@@ -200,13 +200,13 @@ pub fn render_summary_table<'a>(answers: Vec<AnswerModel>) -> Table<'a> {
         .column_spacing(1)
 }
 
-pub fn render_result_step_q<'a>(text: &'a str) -> Paragraph<'a> {
+pub fn render_result_step_q<'a>(text: &'a str, idx: usize, total: usize) -> Paragraph<'a> {
     Paragraph::new(vec![
         Spans::from(Span::raw("")),
         Spans::from(Span::from(text))
     ])
         .block(Block::default()
-            .title("Question")
+            .title(format!(" Question {} out of {} ", idx, total))
             .borders(Borders::ALL)
             .border_type(BorderType::Double))
         .style(Style::default().bg(Color::Blue))

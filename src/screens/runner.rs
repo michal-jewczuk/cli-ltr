@@ -1,9 +1,6 @@
 use crate::app::ScreenType;
 use crate::ui::{layout, menu::Menu};
-use crate::models::test::{
-	   TestModel, QuestionModel,
-	   ResultModel, AnswerModel,
-        };
+use crate::models::test::{TestModel, ResultModel, AnswerModel};
 
 use tui::{
     backend::Backend,
