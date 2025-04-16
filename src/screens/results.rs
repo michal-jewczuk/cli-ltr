@@ -179,7 +179,7 @@ impl Results {
                 })
                 .collect::<Vec<Spans>>();
 
-            let answers_page = layout::get_results_q_page(self.current_q_idx + 1, self.count_q, q.question, answers_spans);
+            let answers_page = layout::get_results_q_page(self.current_q_idx + 1, self.count_q, q.question, answers_spans, q.time);
             f.render_widget(answers_page, chunks[1]);
         }
     }

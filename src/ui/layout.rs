@@ -156,6 +156,7 @@ pub fn render_question<'a>(text: &'a str) -> Paragraph<'a> {
 
 pub fn render_summary_table<'a>(answers: Vec<AnswerModel>) -> Table<'a> {
     let mut idx = 0;
+    let font_color = Color::White;
     let rows: Vec<Row> = answers.iter()
         .map(|a| {
             let mut correct = "No";
@@ -163,7 +164,7 @@ pub fn render_summary_table<'a>(answers: Vec<AnswerModel>) -> Table<'a> {
                 correct = "Yes"
             }
             idx += 1;
-            (format!(" #{:?}", idx), a.question.to_string(), correct.to_string())
+            (format!(" #{:?}", idx), a.question.to_string(), correct.to_string(), format_time(a.time))
         })
         .map(|t| {
 	    let mut color = Color::Red;
@@ -171,10 +172,12 @@ pub fn render_summary_table<'a>(answers: Vec<AnswerModel>) -> Table<'a> {
         	color = Color::Green;
 	    }
 	    let result = Spans::from(vec![Span::raw(" "), Span::raw(t.2)]);
+	    let timer = Spans::from(vec![Span::raw(" "), Span::raw(t.3)]);
 	    Row::new(vec![
-		Cell::from(t.0).style(Style::default().bg(color)),
-		Cell::from(t.1).style(Style::default().bg(color)),
-		Cell::from(result).style(Style::default().bg(color)),
+		Cell::from(t.0).style(Style::default().bg(color).fg(font_color)),
+		Cell::from(t.1).style(Style::default().bg(color).fg(font_color)),
+		Cell::from(timer).style(Style::default().bg(color).fg(font_color)),
+		Cell::from(result).style(Style::default().bg(color).fg(font_color)),
 	    ]).height(1)
 	    .bottom_margin(1)
 	})
@@ -183,7 +186,7 @@ pub fn render_summary_table<'a>(answers: Vec<AnswerModel>) -> Table<'a> {
     Table::new(rows)
         .style(Style::default())
         .header(
-            Row::new(vec![" Number", " Question", " Correct"])
+            Row::new(vec![" Number", " Question", " Time", " Correct"])
             .style(Style::default()
                 .add_modifier(Modifier::BOLD)
                 .fg(Color::White)
@@ -194,15 +197,16 @@ pub fn render_summary_table<'a>(answers: Vec<AnswerModel>) -> Table<'a> {
         .block(Block::default())
         .widths(&[
             Constraint::Percentage(10), 
-            Constraint::Percentage(65), 
+            Constraint::Percentage(45), 
+            Constraint::Percentage(20),
             Constraint::Percentage(25)
         ])
         .column_spacing(1)
 }
 
-pub fn get_results_q_page(qidx: usize, total: usize, q_text: String, answers: Vec<Spans>) -> Paragraph {
+pub fn get_results_q_page(qidx: usize, total: usize, q_text: String, answers: Vec<Spans>, time: u64) -> Paragraph {
     let header = format!("QUESTION {} out of {}", qidx, total);
-    let timer = String::from("Answered in: 00:15");
+    let timer = format!("Answered in: {}", format_time(time));
     let mut txt = vec![
         Spans::from(Span::raw("")),
         Spans::from(Span::styled(header, Style::default().add_modifier(Modifier::BOLD))),
@@ -222,5 +226,26 @@ pub fn get_results_q_page(qidx: usize, total: usize, q_text: String, answers: Ve
         .style(Style::default().bg(Color::Black))
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true })
+}
+
+fn format_time(time: u64) -> String {
+    if time < 60 {
+        return format!("00:{}", format_number(time));
+    }
+
+    let secs = time % 60;
+    let mins = (time - secs) / 60;
+    let secs_t = format_number(secs);
+    let mins_t = format_number(mins);
+
+    format!("{}:{}", mins_t, secs_t)
+}
+
+fn format_number(time: u64) -> String {
+    if time < 10 {
+        format!("0{}", time)
+    } else {
+        format!("{}", time)
+    }
 }
 

@@ -55,7 +55,7 @@ pub struct ResultModel {
     pub id: String,
     pub title: String,
     pub answers: Vec<AnswerModel>,
-    pub total_time: usize,
+    pub total_time: u64,
 }
 
 impl ResultModel {
@@ -63,7 +63,7 @@ impl ResultModel {
         id: String,
         title: String,
         answers: Vec<AnswerModel>, 
-        total_time: usize
+        total_time: u64
         ) -> Self {
         ResultModel { 
             id,
@@ -81,7 +81,7 @@ pub struct AnswerModel {
     pub correct: u8,
     pub given: Option<usize>,
     pub is_correct: bool,
-    pub time: usize,
+    pub time: u64,
 }
 
 impl AnswerModel {
@@ -91,7 +91,7 @@ impl AnswerModel {
 	correct: u8,
 	given: Option<usize>,
 	is_correct: bool,
-	time: usize,
+	time: u64,
     ) -> Self {
 	AnswerModel { question, answers, correct, given, is_correct, time}
     }

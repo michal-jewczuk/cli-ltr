@@ -2,6 +2,8 @@ use crate::app::ScreenType;
 use crate::ui::{layout, menu::Menu};
 use crate::models::test::{TestModel, ResultModel, AnswerModel};
 
+use std::time::{Duration, Instant};
+
 use tui::{
     backend::Backend,
     layout::{Rect},
@@ -21,6 +23,8 @@ pub struct Runner<'a> {
     result: ResultModel,
     question_count: usize,
     show_summary: bool,
+    timer_t: Instant,
+    timer_q: Instant,
 }
 
 impl<'a> Runner<'a> {
@@ -38,6 +42,8 @@ impl<'a> Runner<'a> {
              result: ResultModel::new(String::from(""), String::from(""), vec![], 0),
              question_count, 
              show_summary: false,
+             timer_t: Instant::now(),
+             timer_q: Instant::now(),
          }
     }
 
@@ -122,6 +128,8 @@ impl<'a> Runner<'a> {
 
         let test_m = self.item.clone().unwrap();
 
+        self.timer_t = Instant::now();
+        self.timer_q = Instant::now();
         self.current_q_number = 1;
         self.show_summary = false;
         self.result = ResultModel::new(
@@ -138,7 +146,6 @@ impl<'a> Runner<'a> {
     }
 
     fn handle_enter(&mut self) -> (ScreenType, Option<ResultModel>) {
-        // TODO put question time
         if self.is_running() {
             let q = self.item.clone().unwrap().questions[self.current_q_number - 1].clone();
             let answers = q.answers.iter()
@@ -150,7 +157,7 @@ impl<'a> Runner<'a> {
                     q.correct,
                     self.current_q_answers.state.selected(),
                     q.is_correct(self.current_q_answers.state.selected()),
-                    10
+                    self.timer_q.elapsed().as_secs() 
                 ); 
             self.result.answers.push(answer);
 
@@ -158,13 +165,15 @@ impl<'a> Runner<'a> {
                 // test over, show summary
                 self.current_q_number = 0;
                 self.show_summary = true;
-                // TODO update test time
+                self.result.total_time = self.timer_t.elapsed().as_secs();
+
             } else {
                 // next question
                 let tmp_test = self.item.clone().unwrap();
                 self.current_q_text = tmp_test.questions[self.current_q_number].question;
                 self.current_q_answers = Menu::new(tmp_test.questions[self.current_q_number].answers.clone());
                 self.current_q_number += 1;
+                self.timer_q = Instant::now();
             }
         }
         (ScreenType::Runner, None)
