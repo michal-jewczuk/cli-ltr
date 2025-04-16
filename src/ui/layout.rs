@@ -200,16 +200,26 @@ pub fn render_summary_table<'a>(answers: Vec<AnswerModel>) -> Table<'a> {
         .column_spacing(1)
 }
 
-pub fn render_result_step_q<'a>(text: &'a str, idx: usize, total: usize) -> Paragraph<'a> {
-    Paragraph::new(vec![
+pub fn get_results_q_page(qidx: usize, total: usize, q_text: String, answers: Vec<Spans>) -> Paragraph {
+    let header = format!("QUESTION {} out of {}", qidx, total);
+    let timer = String::from("Answered in: 00:15");
+    let mut txt = vec![
         Spans::from(Span::raw("")),
-        Spans::from(Span::from(text))
-    ])
+        Spans::from(Span::styled(header, Style::default().add_modifier(Modifier::BOLD))),
+        Spans::from(Span::styled(timer, Style::default().add_modifier(Modifier::ITALIC))),
+        Spans::from(Span::raw("")),
+        Spans::from(Span::raw("----------------------------------------")),
+        Spans::from(Span::styled(q_text, Style::default().bg(Color::White).fg(Color::Black))),
+        Spans::from(Span::raw("----------------------------------------")),
+        Spans::from(Span::raw("")),
+    ];
+    txt.extend(answers);
+
+    Paragraph::new(txt)
         .block(Block::default()
-            .title(format!(" Question {} out of {} ", idx, total))
-            .borders(Borders::ALL)
-            .border_type(BorderType::Double))
-        .style(Style::default().bg(Color::Blue))
+            .borders(Borders::NONE)
+        )
+        .style(Style::default().bg(Color::Black))
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true })
 }

@@ -84,10 +84,12 @@ impl Results {
         }
 
         self.current_q_idx += 1;
-        if self.current_q_idx >= self.count_q {
-            self.current_q_idx = 0;
+        if self.current_q_idx > self.count_q {
+            self.current_q_idx = self.count_q;
         }
-        self.current_q = Some(self.item.clone().unwrap().answers[self.current_q_idx].clone());
+        if self.current_q_idx < self.count_q {
+            self.current_q = Some(self.item.clone().unwrap().answers[self.current_q_idx].clone());
+        }
     }
 
     fn handle_previous(&mut self) {
@@ -96,7 +98,7 @@ impl Results {
         }
 
         if self.current_q_idx == 0 {
-            self.current_q_idx = self.count_q - 1;
+            self.current_q_idx = 0; 
         } else {
             self.current_q_idx -= 1;
         }
@@ -148,7 +150,7 @@ impl Results {
         let q = self.current_q.clone().unwrap();
 
         let cols = layout::get_three_col_layout_rect(area, 80);
-        let chunks = layout::get_three_row_layout_rect(cols[1], 10, 30);
+        let chunks = layout::get_two_row_layout_rect(cols[1], 10);
 
         let navbar_b = vec![
             ("[RIGHT]", " Next "), ("[LEFT]", " Previous "), ("[b]", " Back to list "), ("[q]", " Quit "),
@@ -156,27 +158,30 @@ impl Results {
         let navbar = layout::get_navbar(navbar_b);
         f.render_widget(navbar, chunks[0]);
 
-        let content = layout::render_result_step_q(q.question.as_str(), self.current_q_idx + 1, self.count_q);
-        f.render_widget(content, chunks[1]);
+        if self.current_q_idx == self.count_q {
+            let summary = layout::render_summary_table(self.item.clone().unwrap().answers);
+            f.render_widget(summary, chunks[1]);
+        } else {
+            let mut aidx = 0;
+            let answers_spans = q.answers.iter()
+                .map(|a| {
+                    let mut color = Color::Black;
+                    if aidx == q.given.unwrap() {
+                        color = Color::Red;
+                    }
+                    if aidx == q.correct.into() {
+                        color = Color::Green;
+                    }
+                    aidx += 1;
+                    Spans::from(Span::styled(
+                            a.as_str(), 
+                            Style::default().bg(color).fg(Color::White)))
+                })
+                .collect::<Vec<Spans>>();
 
-        let mut aidx = 0;
-        let answers_spans = q.answers.iter()
-            .map(|a| {
-                let mut color = Color::Black;
-                if aidx == q.given.unwrap() {
-                    color = Color::Red;
-                }
-                if aidx == q.correct.into() {
-                    color = Color::Green;
-                }
-                aidx += 1;
-                Spans::from(Span::styled(
-                        a.as_str(), 
-                        Style::default().bg(color).fg(Color::White)))
-            })
-            .collect::<Vec<Spans>>();
-        let answers_p = layout::get_header(answers_spans);
-        f.render_widget(answers_p, chunks[2]);
+            let answers_page = layout::get_results_q_page(self.current_q_idx + 1, self.count_q, q.question, answers_spans);
+            f.render_widget(answers_page, chunks[1]);
+        }
     }
 }
 
