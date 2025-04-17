@@ -249,3 +249,46 @@ fn format_number(time: u64) -> String {
     }
 }
 
+
+#[cfg(test)]
+mod units {
+    use super::*;
+
+    #[test]
+    fn test_format_timer_zero() {
+        let expected = "00:00";
+
+        let result = format_time(0);
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_format_timer_single_digit() {
+        let expected = "00:03";
+
+        let result = format_time(3);
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_format_timer_double_digit() {
+        let expected = "00:49";
+
+        let result = format_time(49);
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_format_timer_with_munutes() {
+        let expected = "02:28";
+
+        let result = format_time(148);
+
+        assert_eq!(result, expected);
+    }
+}
+
+
