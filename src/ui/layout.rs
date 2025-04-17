@@ -140,15 +140,26 @@ fn get_navbar_element(text: &str, primary: bool) -> Span {
     }
 }
 
-pub fn render_question<'a>(text: &'a str) -> Paragraph<'a> {
-    Paragraph::new(vec![
+pub fn get_question_area<'a>(q_text: &'a str, qidx: usize, total: usize, q_time: u64, t_time: u64) -> Paragraph<'a> {
+    let header = format!("QUESTION {} out of {}", qidx, total);
+    let q_timer = format!("Question time elapsed: {}", format_time(q_time));
+    let t_timer = format!("Test time elapsed: {}", format_time(t_time));
+    let mut txt = vec![
         Spans::from(Span::raw("")),
-        Spans::from(Span::from(text)),
-    ])
+        Spans::from(Span::styled(header, Style::default().add_modifier(Modifier::BOLD))),
+        Spans::from(Span::raw("----------")),
+        Spans::from(Span::styled(q_timer, Style::default().add_modifier(Modifier::ITALIC))),
+        Spans::from(Span::styled(t_timer, Style::default().add_modifier(Modifier::ITALIC))),
+        Spans::from(Span::raw("----------")),
+        Spans::from(Span::raw("")),
+        Spans::from(Span::styled(q_text, Style::default().bg(Color::White).fg(Color::Black))),
+        Spans::from(Span::raw("")),
+    ];
+
+    Paragraph::new(txt)
         .block(Block::default()
-            .title("Question")
-            .borders(Borders::ALL)
-            .border_type(BorderType::Double))
+            .borders(Borders::NONE)
+        )
         .style(Style::default().bg(Color::Black))
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true })
