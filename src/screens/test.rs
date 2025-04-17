@@ -11,16 +11,16 @@ use tui::{
 };
 use crossterm::event::{KeyCode};
 
-pub struct Tests<'a> {
+pub struct Tests {
     pub first_render: bool,
-    items: Vec<(&'a str, &'a str)>,
-    list: Menu<'a>,
+    items: Vec<(String, String)>,
+    list: Menu,
 }
 
-impl<'a> Tests<'a> {
-    pub fn new(items: Vec<(&'a str, &'a str)>) -> Self {
-        let names: Vec<&str> = items.iter()
-            .map(|t| t.1)
+impl Tests {
+    pub fn new(items: Vec<(String, String)>) -> Self {
+        let names: Vec<String> = items.iter()
+            .map(|t| t.1.clone())
             .collect();
         Tests { first_render: true, items: items, list: Menu::new(names) }
     }

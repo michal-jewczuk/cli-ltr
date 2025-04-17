@@ -19,7 +19,7 @@ pub struct Runner<'a> {
     item: Option<TestModel<'a>>,
     current_q_number: usize,
     current_q_text: &'a str,
-    current_q_answers: Menu<'a>,
+    current_q_answers: Menu,
     result: ResultModel,
     question_count: usize,
     show_summary: bool,
@@ -137,7 +137,9 @@ impl<'a> Runner<'a> {
         // should here be a None check?
         let tmp_test = self.item.clone().unwrap();
         self.current_q_text = tmp_test.questions[0].question;
-        self.current_q_answers = Menu::new(tmp_test.questions[0].answers.clone());
+        let answers_list: Vec<String> = tmp_test.questions[0].answers.clone().iter()
+            .map(|&i| String::from(i)).collect();
+        self.current_q_answers = Menu::new(answers_list);
 
         (ScreenType::Runner, None)
     }
@@ -168,7 +170,9 @@ impl<'a> Runner<'a> {
                 // next question
                 let tmp_test = self.item.clone().unwrap();
                 self.current_q_text = tmp_test.questions[self.current_q_number].question;
-                self.current_q_answers = Menu::new(tmp_test.questions[self.current_q_number].answers.clone());
+                let answers_list: Vec<String> = tmp_test.questions[self.current_q_number].answers.clone().iter()
+                    .map(|&i| String::from(i)).collect();
+                self.current_q_answers = Menu::new(answers_list);
                 self.current_q_number += 1;
                 self.timer_q = Instant::now();
             }

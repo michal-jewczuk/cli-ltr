@@ -1,25 +1,25 @@
 use tui::widgets::ListState;
 
-pub struct Menu<'a> {
+pub struct Menu {
     pub state: ListState,
-    pub items: Vec<&'a str>,
+    pub items: Vec<String>,
 }
 
 
-impl<'a> Menu<'a> {
+impl Menu {
     pub fn home() -> Self {
         let items = vec![
-            "[t] Tests",
-            "[r] Results",
-            "[d] Redo",
-            "[h] Help",
-            "[q] Exit",
+            String::from("[t] Tests"),
+            String::from("[r] Results"),
+            String::from("[d] Redo"),
+            String::from("[h] Help"),
+            String::from("[q] Exit"),
         ];
         Self::new(items)
     }
 
 
-    pub fn new(items: Vec<&'a str>) -> Self {
+    pub fn new(items: Vec<String>) -> Self {
         let mut state = ListState::default();
         if items.len() > 0 {
             state.select(Some(0));

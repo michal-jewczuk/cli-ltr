@@ -23,9 +23,9 @@ pub enum ScreenType {
 pub struct App<'a> {
     is_finished: bool,
     current_screen: ScreenType,
-    home: home::Home<'a>,
-    tests: test::Tests<'a>,
-    results: results::Results<'a>,
+    home: home::Home,
+    tests: test::Tests,
+    results: results::Results,
     rerun: rerun::Rerun,
     help: help::Help,
     runner: runner::Runner<'a>,

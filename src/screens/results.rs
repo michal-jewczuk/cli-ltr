@@ -13,7 +13,7 @@ use tui::{
 };
 use crossterm::event::{KeyCode};
 
-pub struct Results<'a> {
+pub struct Results {
     pub first_render: bool,
     item: Option<ResultModel>,
     show_details: bool,
@@ -21,10 +21,10 @@ pub struct Results<'a> {
     current_q: Option<AnswerModel>,
     count_q: usize,
     results_items: Vec<(String, String)>,
-    results_list: Menu<'a>,
+    results_list: Menu,
 }
 
-impl Results<'_> {
+impl Results {
     pub fn new(item: Option<ResultModel>) -> Self {
         let mut show_details = true;
         let mut count_q = 0;

@@ -3,7 +3,7 @@ use crate::models::test;
 // should be a struct
 // how to solve value borrowing problem?
 
-pub fn get_to_do<'a>() -> Vec<(&'a str, &'a str)> {
+pub fn get_to_do<'a>() -> Vec<(String, String)> {
     vec![
         test::TestModel {
             id: "xyz",
@@ -24,7 +24,7 @@ pub fn get_to_do<'a>() -> Vec<(&'a str, &'a str)> {
             ],
         },
     ].iter()
-	.map(|t| (t.id, t.title))
+	.map(|t| (String::from(t.id), String::from(t.title)))
 	.collect()
 }
 

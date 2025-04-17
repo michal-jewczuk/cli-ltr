@@ -63,9 +63,9 @@ pub fn get_three_col_layout_rect(f: Rect, middle: u16) -> Vec<Rect> {
         .split(f)
 }
 
-pub fn create_navigable_list<'a>(items: Vec<&'a str>) -> List<'a> {
-    let list_items: Vec<ListItem> = items.iter()
-        .map(|&i| ListItem::new(i))
+pub fn create_navigable_list<'a>(items: Vec<String>) -> List<'a> {
+    let list_items: Vec<ListItem> = items.into_iter()
+        .map(|i| ListItem::new(i))
         .collect();
     List::new(list_items)
         .block(Block::default().borders(Borders::TOP | Borders::BOTTOM))

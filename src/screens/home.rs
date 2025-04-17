@@ -11,12 +11,12 @@ use tui::{
 };
 use crossterm::event::{KeyCode};
 
-pub struct Home<'a> {
+pub struct Home {
     pub first_render: bool,
-    menu: Menu<'a>,
+    menu: Menu,
 }
 
-impl<'a> Home<'a> {
+impl Home {
     pub fn new() -> Self {
         Home { first_render: true, menu: Menu::home() }
     }
