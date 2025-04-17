@@ -50,6 +50,9 @@ impl Results {
             if self.show_details {
                 self.handle_start();
             }
+
+            //self.results_list = Menu::new(self.results_items.clone().into_iter().map(|t| t.1).collect::<Vec<String>>());
+            self.results_list = Menu::new(self.results_items.clone().into_iter().map(|t| t.1).collect());
             self.first_render = false;
             f.render_widget(Clear, f.size());
             return;
@@ -67,12 +70,34 @@ impl Results {
 
     pub fn handle_key_code(&mut self, code: KeyCode) -> ScreenType {
         match code {
-            KeyCode::Char('b') | KeyCode::Char('B') => return ScreenType::Home,
+            KeyCode::Char('b') | KeyCode::Char('B') => {
+                if self.show_details {
+                    self.show_details = false;
+                    return ScreenType::Results;
+                }
+                return ScreenType::Home;
+            },
             KeyCode::Right => self.handle_next(),
             KeyCode::Left => self.handle_previous(),
+            KeyCode::Up => self.results_list.previous(),
+            KeyCode::Down => self.results_list.next(),
+            KeyCode::Enter => self.handle_enter(),
             _ => {}
         } 
         ScreenType::Results
+    }
+
+    fn handle_enter(&mut self) {
+        if self.show_details {
+            return;
+        }
+
+        match self.results_list.state.selected() {
+            Some(idx) => {
+                println!("Selected result_id: {}", self.results_items[idx].0);
+            },
+            None => ()
+        }
     }
 
     fn handle_start(&mut self) {
@@ -140,7 +165,7 @@ impl Results {
     fn render_content<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let content = layout::create_navigable_list(self.results_list.items.clone());
 
-        f.render_widget(content, area);
+        f.render_stateful_widget(content, area, &mut self.results_list.state);
     }
 
     fn render_details_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
