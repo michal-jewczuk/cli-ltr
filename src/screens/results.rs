@@ -1,6 +1,7 @@
 use crate::app::ScreenType;
-use crate::ui::layout;
+use crate::ui::{layout, menu::Menu};
 use crate::models::test::{AnswerModel, ResultModel};
+use crate::service::testservice;
 
 use tui::{
     backend::Backend,
@@ -12,19 +13,22 @@ use tui::{
 };
 use crossterm::event::{KeyCode};
 
-pub struct Results {
+pub struct Results<'a> {
     pub first_render: bool,
     item: Option<ResultModel>,
     show_details: bool,
     current_q_idx: usize,
     current_q: Option<AnswerModel>,
     count_q: usize,
+    results_items: Vec<(String, String)>,
+    results_list: Menu<'a>,
 }
 
-impl Results {
+impl Results<'_> {
     pub fn new(item: Option<ResultModel>) -> Self {
         let mut show_details = true;
         let mut count_q = 0;
+        let results_items = testservice::get_results_list();
         match item {
             None => show_details = false,
             Some(ref r) => count_q = r.answers.len(),
@@ -36,6 +40,8 @@ impl Results {
             current_q_idx: 0,
             current_q: None,
             count_q,
+            results_items,
+            results_list: Menu::new(vec![]),
         }
     }
 
@@ -55,11 +61,7 @@ impl Results {
             self.render_details_header(f, chunks[0]);
             self.render_details_body(f, chunks[1]);
         } else {
-            let chunks = layout::get_three_row_layout_rect(f.size(), 15, 10);
-
-            self.render_header(f, chunks[0]);
-            self.render_navbar(f, chunks[1]);
-            self.render_content(f, chunks[2]);
+            self.render_results_list(f);
         }
     }
 
@@ -105,6 +107,14 @@ impl Results {
         self.current_q = Some(self.item.clone().unwrap().answers[self.current_q_idx].clone());
     }
 
+    fn render_results_list<B: Backend>(&mut self, f: &mut Frame<B>) {
+        let chunks = layout::get_three_row_layout_rect(f.size(), 15, 10);
+
+        self.render_header(f, chunks[0]);
+        self.render_navbar(f, chunks[1]);
+        self.render_content(f, chunks[2]);
+    }
+
     fn render_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![
             Spans::from(Span::raw("")),
@@ -128,10 +138,7 @@ impl Results {
     }
 
     fn render_content<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let text = vec![
-            Spans::from(Span::raw("List with finished tests")),
-        ];
-        let content = layout::get_header(text);
+        let content = layout::create_navigable_list(self.results_list.items.clone());
 
         f.render_widget(content, area);
     }

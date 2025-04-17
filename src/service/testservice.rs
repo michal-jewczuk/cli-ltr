@@ -28,6 +28,15 @@ pub fn get_to_do<'a>() -> Vec<(&'a str, &'a str)> {
 	.collect()
 }
 
+pub fn get_results_list() -> Vec<(String, String)> {
+    vec![
+        (String::from("r_1"), String::from("[2025-01-03] Week exam #1")),
+        (String::from("r_2"), String::from("[2025-01-03] Adjectives")),
+        (String::from("r_3"), String::from("[2025-01-08] Reading between the lines")),
+        (String::from("r_4"), String::from("[2025-01-12] Nouns or nuns")),
+    ]
+}
+
 pub fn get_by_id<'a>(id: String) -> Option<test::TestModel<'a>> {
     vec![
         test::TestModel {

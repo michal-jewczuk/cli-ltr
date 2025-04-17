@@ -25,7 +25,7 @@ pub struct App<'a> {
     current_screen: ScreenType,
     home: home::Home<'a>,
     tests: test::Tests<'a>,
-    results: results::Results,
+    results: results::Results<'a>,
     rerun: rerun::Rerun,
     help: help::Help,
     runner: runner::Runner<'a>,
