@@ -9,7 +9,7 @@ use tui::{
 };
 use crossterm::event::{Event, KeyCode, KeyEvent};
 
-
+#[derive(PartialEq)]
 pub enum ScreenType {
     Home,
     Tests,
@@ -78,6 +78,11 @@ impl App<'_> {
                     self.is_finished = true
                 }
             },
+            // make sure the home screen is always cleared when comming back to it
+            KeyCode::Char('b') | KeyCode::Char('B') => {
+                self.home.first_render = true;
+                self.handle_key_code(KeyCode::Char('b'));
+            }
             other_code => self.handle_key_code(other_code)?
         }
         Ok(())
