@@ -31,9 +31,9 @@ impl Home {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
-                Constraint::Percentage(15), 
-                Constraint::Percentage(15), 
-                Constraint::Percentage(70)
+                Constraint::Length(3), 
+                Constraint::Length(4), 
+                Constraint::Min(0)
             ].as_ref())
             .split(f.size());
     
@@ -70,28 +70,19 @@ impl Home {
 
     fn render_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let header_border = Spans::from(Span::raw("==========================="));
-        let mut text = vec![
-            Spans::from(Span::raw("")),
+        let text = vec![
             header_border.clone(),
             Spans::from(vec![
                 Span::raw("WELCOME TO "),
                 Span::styled("CLI Language Test Runner", Style::default().add_modifier(Modifier::BOLD)),
-                Span::raw(format!("{}", area.height)),
             ]),
             header_border.clone(),
-            Spans::from(Span::raw("")),
         ];
-        if area.height < 5 {
-            text = text[1..4].to_vec();
-        }
 
-        let header = Paragraph::new(text)
-            .block(Block::default())
-            .style(Style::default().fg(Color::White).bg(Color::DarkGray))
-            .alignment(Alignment::Center)
-            .wrap(Wrap { trim: true });
+        let header = layout::get_header(text);
+        let header_area = layout::get_column_with_margin(area, 10, 150);
     
-        f.render_widget(header, area);
+        f.render_widget(header, header_area);
     }
 
     fn render_menu_instructions<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
@@ -108,8 +99,9 @@ impl Home {
             .style(Style::default().fg(Color::White).bg(Color::DarkGray))
             .alignment(Alignment::Center)
             .wrap(Wrap { trim: true });
+        let instructions_area = layout::get_column_with_margin(area, 10, 150);
     
-        f.render_widget(instructions, area);
+        f.render_widget(instructions, instructions_area);
     }
 
     fn render_menu<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {

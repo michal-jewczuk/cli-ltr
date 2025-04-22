@@ -21,6 +21,17 @@ pub fn get_adaptative_column(f: Rect) -> Rect {
     Rect::new(x, f.y, x_w, f.height)
 }
 
+pub fn get_column_with_margin(f: Rect, margin: u16, threshold: u16) -> Rect {
+    let mut x = 0;
+    let mut x_w = f.width;
+    if f.width > threshold {
+        x_w = f.width * (100 - margin) / 100;
+        x = f.width *  margin / 200;
+    }
+
+    Rect::new(x, f.y, x_w, f.height)
+}
+
 pub fn get_basic_layout<B: Backend>(f: &mut Frame<B>) -> Vec<Rect> {
     Layout::default()
         .direction(Direction::Vertical)
@@ -91,7 +102,7 @@ pub fn get_par_with_colors(text: Vec<Spans>, fg: Color, bg: Color) -> Paragraph 
 pub fn get_header(text: Vec<Spans>) -> Paragraph {
     Paragraph::new(text)
         .block(Block::default())
-        .style(Style::default().fg(Color::White).bg(Color::DarkGray))
+        .style(Style::default().fg(Color::Blue).bg(Color::White))
         .alignment(Alignment::Center)
         .wrap(Wrap { trim: true })
 }
@@ -299,6 +310,26 @@ mod units {
         let expected = "02:28";
 
         let result = format_time(148);
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_col_with_margin_above() {
+        let given = Rect::new(0,0,120,20);
+        let expected = Rect::new(6,0,108,20);
+
+        let result = get_column_with_margin(given, 10, 50);
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_col_with_margin_below() {
+        let given = Rect::new(0,0,100,20);
+        let expected = Rect::new(0,0,100,20);
+
+        let result = get_column_with_margin(given, 10, 150);
 
         assert_eq!(result, expected);
     }
