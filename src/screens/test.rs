@@ -82,13 +82,8 @@ impl Tests {
 
     fn render_test_items<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let list = layout::create_navigable_list(self.list.items.clone());
-        let mut x = 0;
-        let mut x_w = area.width;
-        if area.width > 100 {
-            x = area.width / 2 - 50;
-            x_w = 100; 
-        }
-        let list_area = Rect::new(x, area.y, x_w, area.height);
+        let list_area = layout::get_adaptative_column(area);
+
         f.render_stateful_widget(list, list_area, &mut self.list.state);
     }
 }

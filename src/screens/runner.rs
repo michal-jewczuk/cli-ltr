@@ -66,13 +66,13 @@ impl<'a> Runner<'a> {
             self.render_question_page(f);
         } else {
             if self.show_summary {
-                let chunks = layout::get_three_row_layout_rect(f.size(), 10, 10);
+                let chunks = layout::get_three_row_layout(f.size(), 10, 10);
 
                 self.render_summary_header(f, chunks[0]);
                 self.render_summary_navbar(f, chunks[1]);
 		self.render_summary_body(f, chunks[2]);
             } else {
-                let chunks = layout::get_two_row_layout(f, 20);
+                let chunks = layout::get_two_row_layout(f.size(), 20);
 
                 self.render_test_name(f, chunks[0]);
                 self.render_start_area(f, chunks[1]);
@@ -181,7 +181,7 @@ impl<'a> Runner<'a> {
     }
 
     fn render_question_page<B: Backend>(&mut self, f: &mut Frame<B>) {
-        let chunks = layout::get_two_row_layout(f, 20);
+        let chunks = layout::get_two_row_layout(f.size(), 20);
 
         self.render_question(f, chunks[0]);
         self.render_answers(f, chunks[1]);
@@ -203,8 +203,8 @@ impl<'a> Runner<'a> {
     }
 
     fn render_start_area<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let cols = layout::get_three_col_layout_rect(area, 60);
-        let chunks = layout::get_three_row_layout_rect(cols[1], 15,15);
+        let cols = layout::get_three_col_layout(area, 60);
+        let chunks = layout::get_three_row_layout(cols[1], 15,15);
 
         let instruction = vec![
             Spans::from(Span::raw("Do you want to start the test?")),
@@ -222,7 +222,7 @@ impl<'a> Runner<'a> {
     }
 
     fn render_question<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let cols = layout::get_three_col_layout_rect(area, 60);
+        let cols = layout::get_three_col_layout(area, 60);
         let q_time = self.timer_q.elapsed().as_secs();
         let t_time = self.timer_t.elapsed().as_secs();
         let question_l = layout::get_question_area(
@@ -233,7 +233,7 @@ impl<'a> Runner<'a> {
     }
 
     fn render_answers<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let cols = layout::get_three_col_layout_rect(area, 60);
+        let cols = layout::get_three_col_layout(area, 60);
         let answers_l = layout::create_navigable_list(self.current_q_answers.items.clone());
 
         f.render_stateful_widget(answers_l, cols[1], &mut self.current_q_answers.state);
@@ -258,7 +258,7 @@ impl<'a> Runner<'a> {
     }
 
     fn render_summary_body<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let cols = layout::get_three_col_layout_rect(area, 60);
+        let cols = layout::get_three_col_layout(area, 60);
         let table = layout::render_summary_table(self.result.clone().answers);
 
 	f.render_widget(table, cols[1]);

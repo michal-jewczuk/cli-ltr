@@ -9,6 +9,18 @@ use tui::{
     Frame,
 };
 
+
+pub fn get_adaptative_column(f: Rect) -> Rect {
+    let mut x = 0;
+    let mut x_w = f.width;
+    if f.width > 100 {
+        x = f.width / 2 - 50;
+        x_w = 100;
+    }
+
+    Rect::new(x, f.y, x_w, f.height)
+}
+
 pub fn get_basic_layout<B: Backend>(f: &mut Frame<B>) -> Vec<Rect> {
     Layout::default()
         .direction(Direction::Vertical)
@@ -20,17 +32,7 @@ pub fn get_basic_layout<B: Backend>(f: &mut Frame<B>) -> Vec<Rect> {
         .split(f.size())
 }
 
-pub fn get_two_row_layout<B: Backend>(f: &mut Frame<B>, first: u16) -> Vec<Rect> {
-    Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage(first),
-            Constraint::Percentage(100 - first)
-            ].as_ref())
-        .split(f.size())
-}
-
-pub fn get_two_row_layout_rect(f: Rect, first: u16) -> Vec<Rect> {
+pub fn get_two_row_layout(f: Rect, first: u16) -> Vec<Rect> {
     Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -40,7 +42,7 @@ pub fn get_two_row_layout_rect(f: Rect, first: u16) -> Vec<Rect> {
         .split(f)
 }
 
-pub fn get_three_row_layout_rect(f: Rect, first: u16, second: u16) -> Vec<Rect> {
+pub fn get_three_row_layout(f: Rect, first: u16, second: u16) -> Vec<Rect> {
     Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -51,7 +53,7 @@ pub fn get_three_row_layout_rect(f: Rect, first: u16, second: u16) -> Vec<Rect> 
         .split(f)
 }
 
-pub fn get_three_col_layout_rect(f: Rect, middle: u16) -> Vec<Rect> {
+pub fn get_three_col_layout(f: Rect, middle: u16) -> Vec<Rect> {
     let side = (100 - middle) / 2;
     Layout::default()
         .direction(Direction::Horizontal)

@@ -58,12 +58,12 @@ impl Results {
         }
 
         if self.show_details {
-            let chunks = layout::get_two_row_layout_rect(f.size(), 10);
+            let chunks = layout::get_two_row_layout(f.size(), 10);
 
             self.render_details_header(f, chunks[0]);
             self.render_details_body(f, chunks[1]);
         } else {
-            self.render_results_list(f);
+            self.render_list(f);
         }
     }
 
@@ -136,15 +136,15 @@ impl Results {
         self.current_q = Some(self.item.clone().unwrap().answers[self.current_q_idx].clone());
     }
 
-    fn render_results_list<B: Backend>(&mut self, f: &mut Frame<B>) {
-        let chunks = layout::get_three_row_layout_rect(f.size(), 15, 10);
+    fn render_list<B: Backend>(&mut self, f: &mut Frame<B>) {
+        let chunks = layout::get_three_row_layout(f.size(), 15, 10);
 
-        self.render_header(f, chunks[0]);
-        self.render_navbar(f, chunks[1]);
-        self.render_content(f, chunks[2]);
+        self.render_list_header(f, chunks[0]);
+        self.render_list_navbar(f, chunks[1]);
+        self.render_list_content(f, chunks[2]);
     }
 
-    fn render_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
+    fn render_list_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![
             Spans::from(Span::raw("")),
             Spans::from(vec![
@@ -159,17 +159,18 @@ impl Results {
         f.render_widget(header, area);
     }
 
-    fn render_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
+    fn render_list_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![("[b]", " Home "), ("[q]", " Quit ")];
         let navbar = layout::get_navbar(text);
 
         f.render_widget(navbar, area);
     }
 
-    fn render_content<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
+    fn render_list_content<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let content = layout::create_navigable_list(self.results_list.items.clone());
+        let content_area = layout::get_adaptative_column(area);
 
-        f.render_stateful_widget(content, area, &mut self.results_list.state);
+        f.render_stateful_widget(content, content_area, &mut self.results_list.state);
     }
 
     fn render_details_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
@@ -185,8 +186,8 @@ impl Results {
     fn render_details_body<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let q = self.current_q.clone().unwrap();
 
-        let cols = layout::get_three_col_layout_rect(area, 80);
-        let chunks = layout::get_two_row_layout_rect(cols[1], 10);
+        let cols = layout::get_three_col_layout(area, 80);
+        let chunks = layout::get_two_row_layout(cols[1], 10);
 
         let navbar_b = vec![
             ("[RIGHT]", " Next "), ("[LEFT]", " Previous "), ("[b]", " Back to list "), ("[q]", " Quit "),
