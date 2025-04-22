@@ -51,7 +51,6 @@ impl Results {
                 self.handle_start();
             }
 
-            //self.results_list = Menu::new(self.results_items.clone().into_iter().map(|t| t.1).collect::<Vec<String>>());
             self.results_list = Menu::new(self.results_items.clone().into_iter().map(|t| t.1).collect());
             self.first_render = false;
             f.render_widget(Clear, f.size());
@@ -94,7 +93,10 @@ impl Results {
 
         match self.results_list.state.selected() {
             Some(idx) => {
-                println!("Selected result_id: {}", self.results_items[idx].0);
+                self.item = testservice::get_results_by_id(self.results_items[idx].0.clone());
+                if self.item.is_some() {
+                    self.handle_start();
+                }
             },
             None => ()
         }
@@ -103,6 +105,8 @@ impl Results {
     fn handle_start(&mut self) {
         self.current_q_idx = 0;
         self.current_q = Some(self.item.clone().unwrap().answers[0].clone());
+        self.count_q = self.item.as_ref().unwrap().answers.len();
+        self.show_details = true;
     }
 
     fn handle_next(&mut self) {
