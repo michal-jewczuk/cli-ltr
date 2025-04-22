@@ -4,7 +4,7 @@ use crate::ui::{layout, menu::Menu};
 use tui::{
     backend::Backend,
     layout::{Rect},
-    style::{Color, Modifier, Style},
+    style::{Modifier, Style},
     text::{Span, Spans},
     widgets::Clear,
     Frame,

@@ -5,7 +5,7 @@ use tui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, Borders, BorderType, Cell, List, ListItem, Paragraph, Row, Table, Wrap},
+    widgets::{Block, Borders, Cell, List, ListItem, Paragraph, Row, Table, Wrap},
     Frame,
 };
 
@@ -144,7 +144,7 @@ pub fn get_question_area<'a>(q_text: &'a str, qidx: usize, total: usize, q_time:
     let header = format!("QUESTION {} out of {}", qidx, total);
     let q_timer = format!("Question time elapsed: {}", format_time(q_time));
     let t_timer = format!("Test time elapsed: {}", format_time(t_time));
-    let mut txt = vec![
+    let txt = vec![
         Spans::from(Span::raw("")),
         Spans::from(Span::styled(header, Style::default().add_modifier(Modifier::BOLD))),
         Spans::from(Span::raw("----------")),

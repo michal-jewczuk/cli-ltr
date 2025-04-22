@@ -2,7 +2,7 @@ use crate::app::ScreenType;
 use crate::ui::{layout, menu::Menu};
 use crate::models::test::{TestModel, ResultModel, AnswerModel};
 
-use std::time::{Duration, Instant};
+use std::time::{Instant};
 
 use tui::{
     backend::Backend,
