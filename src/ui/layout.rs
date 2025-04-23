@@ -32,6 +32,17 @@ pub fn get_column_with_margin(f: Rect, margin: u16, threshold: u16) -> Rect {
     Rect::new(x, f.y, x_w, f.height)
 }
 
+pub fn get_3_4_layout(f: Rect) -> Vec<Rect> {
+    Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(3), 
+            Constraint::Length(4), 
+            Constraint::Min(0)
+        ].as_ref())
+        .split(f)
+}
+
 pub fn get_basic_layout<B: Backend>(f: &mut Frame<B>) -> Vec<Rect> {
     Layout::default()
         .direction(Direction::Vertical)
@@ -76,6 +87,11 @@ pub fn get_three_col_layout(f: Rect, middle: u16) -> Vec<Rect> {
         .split(f)
 }
 
+pub fn get_background() -> Block<'static> {
+    Block::default()
+        .style(Style::default().bg(Color::Black))
+}
+
 pub fn create_navigable_list<'a>(items: Vec<String>) -> List<'a> {
     let list_items: Vec<ListItem> = items.into_iter()
         .map(|i| ListItem::new(i))
@@ -85,7 +101,7 @@ pub fn create_navigable_list<'a>(items: Vec<String>) -> List<'a> {
         .style(Style::default().fg(Color::White))
         .highlight_style(
             Style::default()
-            .bg(Color::Magenta)
+            .bg(Color::Blue)
             .add_modifier(Modifier::BOLD)
             )
         .highlight_symbol(">> ")
@@ -95,6 +111,14 @@ pub fn get_par_with_colors(text: Vec<Spans>, fg: Color, bg: Color) -> Paragraph 
     Paragraph::new(text)
         .block(Block::default())
         .style(Style::default().fg(fg).bg(bg))
+        .alignment(Alignment::Center)
+        .wrap(Wrap { trim: true })
+}
+
+pub fn get_par_with_borders(text: Vec<Spans>) -> Paragraph {
+    Paragraph::new(text)
+        .block(Block::default().borders(Borders::TOP | Borders::BOTTOM))
+        .style(Style::default().fg(Color::White).bg(Color::Blue))
         .alignment(Alignment::Center)
         .wrap(Wrap { trim: true })
 }

@@ -3,10 +3,10 @@ use crate::ui::{layout, menu::Menu};
 
 use tui::{
     backend::Backend,
-    layout::{Alignment, Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
+    layout::{Rect},
+    style::{Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, Borders, Clear, Paragraph, Wrap},
+    widgets::{Clear},
     Frame,
 };
 use crossterm::event::{KeyCode};
@@ -28,18 +28,13 @@ impl Home {
             return;
         }
 
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints([
-                Constraint::Length(3), 
-                Constraint::Length(4), 
-                Constraint::Min(0)
-            ].as_ref())
-            .split(f.size());
+        let background = layout::get_background();
+        f.render_widget(background, f.size());
     
-        self.render_header(f, chunks[0]);
-        self.render_menu_instructions(f, chunks[1]);
-        self.render_menu(f, chunks[2]);
+        let layout = layout::get_3_4_layout(f.size());
+        self.render_header(f, layout[0]);
+        self.render_menu_instructions(f, layout[1]);
+        self.render_menu(f, layout[2]);
     }
 
     pub fn handle_key_code(&mut self, code: KeyCode) -> ScreenType {
@@ -86,31 +81,21 @@ impl Home {
     }
 
     fn render_menu_instructions<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let mut text = vec![
-            Spans::from(Span::raw("")),
+        let text = vec![
             Spans::from(Span::raw("You can use UP or DOWN arrows to navigate through menu items and ENTER to confirm")),
             Spans::from(Span::raw("or you can use the specified key shortcut to instantly confirm")),
         ];
-        if area.height < 6 {
-            text = text[1..3].to_vec();
-        }
-        let instructions = Paragraph::new(text)
-            .block(Block::default().borders(Borders::TOP | Borders::BOTTOM))
-            .style(Style::default().fg(Color::White).bg(Color::DarkGray))
-            .alignment(Alignment::Center)
-            .wrap(Wrap { trim: true });
+        let instructions = layout::get_par_with_borders(text);
         let instructions_area = layout::get_column_with_margin(area, 10, 150);
     
         f.render_widget(instructions, instructions_area);
     }
 
     fn render_menu<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let list = layout::create_navigable_list(self.menu.items.clone());
-        let x = area.width / 2 - 10;
-        let y = area.y + 2;
-        let menu_area = Rect::new(x, y, 20, 7);
+        let menu = layout::create_navigable_list(self.menu.items.clone());
+        let menu_area = layout::get_column_with_margin(area, 60, 50);
     
-        f.render_stateful_widget(list, menu_area, &mut self.menu.state);
+        f.render_stateful_widget(menu, menu_area, &mut self.menu.state);
     }
 }
 
