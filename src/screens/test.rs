@@ -31,12 +31,15 @@ impl Tests {
             f.render_widget(Clear, f.size());
             return;
         }
-        
-        let chunks = layout::get_basic_layout(f);
 
-        self.render_header(f, chunks[0]);
-        self.render_navbar(f, chunks[1]);
-        self.render_test_items(f, chunks[2]);
+        let background = layout::get_background();
+        f.render_widget(background, f.size());
+        
+        let layout = layout::get_header_navbar_layout(f.size(), 3, 3);
+
+        self.render_header(f, layout[0]);
+        self.render_navbar(f, layout[1]);
+        self.render_test_items(f, layout[2]);
     }
 
     pub fn handle_key_code(&mut self, code: KeyCode) -> (ScreenType, String) {
@@ -69,15 +72,17 @@ impl Tests {
             ]),
         ];
         let header = layout::get_header(text);
+        let header_area = layout::get_column_with_margin(area, 10, 150);
     
-        f.render_widget(header, area);
+        f.render_widget(header, header_area);
     }
 
     fn render_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![("[b]", " Home "), ("[q]", " Quit ")];
         let navbar = layout::get_navbar(text);
+        let navbar_area = layout::get_column_with_margin(area, 10, 150);
 
-        f.render_widget(navbar, area);
+        f.render_widget(navbar, navbar_area);
     }
 
     fn render_test_items<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {

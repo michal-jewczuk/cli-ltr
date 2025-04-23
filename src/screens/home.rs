@@ -31,7 +31,7 @@ impl Home {
         let background = layout::get_background();
         f.render_widget(background, f.size());
     
-        let layout = layout::get_3_4_layout(f.size());
+        let layout = layout::get_header_navbar_layout(f.size(), 3, 4);
         self.render_header(f, layout[0]);
         self.render_menu_instructions(f, layout[1]);
         self.render_menu(f, layout[2]);

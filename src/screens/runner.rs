@@ -62,6 +62,9 @@ impl<'a> Runner<'a> {
             return;
         }
 
+        let background = layout::get_background();
+        f.render_widget(background, f.size());
+
         if self.is_running() {
             self.render_question_page(f);
         } else {
@@ -72,10 +75,10 @@ impl<'a> Runner<'a> {
                 self.render_summary_navbar(f, chunks[1]);
 		self.render_summary_body(f, chunks[2]);
             } else {
-                let chunks = layout::get_two_row_layout(f.size(), 20);
+                let layout = layout::get_header_body_layout(f.size(), 3);
 
-                self.render_test_name(f, chunks[0]);
-                self.render_start_area(f, chunks[1]);
+                self.render_test_name(f, layout[0]);
+                self.render_start_area(f, layout[1]);
             }
         }
     }
@@ -191,34 +194,34 @@ impl<'a> Runner<'a> {
         let title = self.item.as_ref().map_or("42", |i| i.title);
         let text = vec![
             Spans::from(Span::raw("")),
-            Spans::from(Span::raw("---=====---")),
             Spans::from(vec![
                 Span::styled(title, Style::default().add_modifier(Modifier::BOLD)),
             ]),
-            Spans::from(Span::raw("---=====---")),
         ];
         let header = layout::get_header(text);
+        let header_area = layout::get_column_with_margin(area, 10, 150);
     
-        f.render_widget(header, area);
+        f.render_widget(header, header_area);
     }
 
     fn render_start_area<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let cols = layout::get_three_col_layout(area, 60);
-        let chunks = layout::get_three_row_layout(cols[1], 15,15);
+        let start_area = layout::get_column_with_margin(area, 10, 150);
+        let layout = layout::get_header_navbar_layout(start_area, 4, 3);
 
         let instruction = vec![
+            Spans::from(Span::raw("")),
             Spans::from(Span::raw("Do you want to start the test?")),
             Spans::from(vec![
                 Span::styled("Please note: ", Style::default().add_modifier(Modifier::BOLD)),
                 Span::raw("once started, the test must be finished!"),
             ])
         ];
-        let instruction_a = layout::get_par_with_colors(instruction, Color::White, Color::Blue);
-        f.render_widget(instruction_a, chunks[0]);
+        let instruction_p = layout::get_par_with_colors(instruction, Color::White, Color::Blue);
+        f.render_widget(instruction_p, layout[0]);
 
         let text = vec![("[s]", " Start "), ("[b]", " Back "), ("[q]", " Quit ")];
         let start_buttons = layout::get_test_start_row(text);
-        f.render_widget(start_buttons, chunks[1]);
+        f.render_widget(start_buttons, layout[1]);
     }
 
     fn render_question<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {

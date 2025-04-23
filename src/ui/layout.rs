@@ -32,12 +32,22 @@ pub fn get_column_with_margin(f: Rect, margin: u16, threshold: u16) -> Rect {
     Rect::new(x, f.y, x_w, f.height)
 }
 
-pub fn get_3_4_layout(f: Rect) -> Vec<Rect> {
+pub fn get_header_navbar_layout(f: Rect, header: u16, navbar: u16) -> Vec<Rect> {
     Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(3), 
-            Constraint::Length(4), 
+            Constraint::Length(header), 
+            Constraint::Length(navbar), 
+            Constraint::Min(0)
+        ].as_ref())
+        .split(f)
+}
+
+pub fn get_header_body_layout(f: Rect, header: u16) -> Vec<Rect> {
+    Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(header), 
             Constraint::Min(0)
         ].as_ref())
         .split(f)
@@ -148,7 +158,7 @@ pub fn get_navbar<'a>(text: Vec<(&'a str, &'a str)>) -> Paragraph<'a> {
     ];
     Paragraph::new(spans)
         .block(Block::default())
-        .style(Style::default().bg(Color::Magenta))
+        .style(Style::default().bg(Color::Blue))
         .alignment(Alignment::Center)
         .wrap(Wrap { trim: true })
 }
