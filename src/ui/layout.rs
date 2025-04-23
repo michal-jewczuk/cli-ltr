@@ -143,15 +143,18 @@ pub fn get_header(text: Vec<Spans>) -> Paragraph {
 
 pub fn get_navbar<'a>(text: Vec<(&'a str, &'a str)>) -> Paragraph<'a> {
     let mut nb = vec![
-        get_navbar_element("[Navigation:]", false),
+        Span::styled(".", Style::default().fg(Color::Blue)),
+        get_navbar_element(" Navigation: ", false),
         Span::raw(" "),
     ];
     text.iter().for_each(|t| {
         nb.push(get_navbar_element(t.0, true));
         nb.push(get_navbar_element(t.1, false));
-        nb.push(Span::styled(" // ", Style::default().add_modifier(Modifier::BOLD)));
+        //nb.push(Span::styled(" // ", Style::default().add_modifier(Modifier::BOLD)));
+        nb.push(Span::styled("__", Style::default().fg(Color::Blue).add_modifier(Modifier::BOLD)));
     });
     nb.pop();
+    nb.push(Span::styled(".", Style::default().fg(Color::Blue)));
     let spans = vec![
         Spans::from(Span::raw("")),
         Spans::from(nb)

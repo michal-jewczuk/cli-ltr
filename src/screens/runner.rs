@@ -184,7 +184,7 @@ impl<'a> Runner<'a> {
     }
 
     fn render_question_page<B: Backend>(&mut self, f: &mut Frame<B>) {
-        let chunks = layout::get_two_row_layout(f.size(), 20);
+        let chunks = layout::get_two_row_layout(f.size(), 40);
 
         self.render_question(f, chunks[0]);
         self.render_answers(f, chunks[1]);
