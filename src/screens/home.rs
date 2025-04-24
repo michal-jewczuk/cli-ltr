@@ -75,7 +75,7 @@ impl Home {
         ];
 
         let header = layout::get_header(text);
-        let header_area = layout::get_column_with_margin(area, 10, 150);
+        let header_area = layout::get_default_column(area);
     
         f.render_widget(header, header_area);
     }
@@ -86,14 +86,13 @@ impl Home {
             Spans::from(Span::raw("or you can use the specified key shortcut to instantly confirm")),
         ];
         let instructions = layout::get_par_with_borders(text);
-        let instructions_area = layout::get_column_with_margin(area, 10, 150);
+        let instructions_area = layout::get_default_column(area);
     
         f.render_widget(instructions, instructions_area);
     }
 
     fn render_menu<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let menu = layout::create_navigable_list(self.menu.items.clone());
-        //let menu_area = layout::get_column_with_margin(area, 60, 50);
         let menu_area = layout::get_adaptative_column(area);
     
         f.render_stateful_widget(menu, menu_area, &mut self.menu.state);

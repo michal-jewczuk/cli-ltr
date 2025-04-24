@@ -158,7 +158,7 @@ impl Results {
         ];
 
         let header = layout::get_header(text);
-        let header_area = layout::get_column_with_margin(area, 10, 150);
+        let header_area = layout::get_default_column(area);
     
         f.render_widget(header, header_area);
     }
@@ -166,7 +166,7 @@ impl Results {
     fn render_list_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![("[b]", " Home "), ("[q]", " Quit ")];
         let navbar = layout::get_navbar(text);
-        let navbar_area = layout::get_column_with_margin(area, 10, 150);
+        let navbar_area = layout::get_default_column(area);
 
         f.render_widget(navbar, navbar_area);
     }
@@ -184,7 +184,7 @@ impl Results {
             Spans::from(Span::styled(self.item.clone().unwrap().title, Style::default().add_modifier(Modifier::BOLD))),
         ];
         let header = layout::get_header(text);
-        let header_area = layout::get_column_with_margin(area, 10, 150);
+        let header_area = layout::get_default_column(area);
     
         f.render_widget(header, header_area);
     }
@@ -198,7 +198,7 @@ impl Results {
             ("[RIGHT]", " Next "), ("[LEFT]", " Previous "), ("[b]", " Back to list "), ("[q]", " Quit "),
         ];
         let navbar = layout::get_navbar(navbar_b);
-        let navbar_area = layout::get_column_with_margin(layout[0], 10, 150);
+        let navbar_area = layout::get_default_column(layout[0]);
         f.render_widget(navbar, navbar_area);
 
         let content_area = layout::get_column_with_margin(layout[1], 20, 150);

@@ -1,12 +1,10 @@
 use crate::models::test::AnswerModel;
 
 use tui::{
-    backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
     widgets::{Block, Borders, Cell, List, ListItem, Paragraph, Row, Table, Wrap},
-    Frame,
 };
 
 
@@ -19,6 +17,10 @@ pub fn get_adaptative_column(f: Rect) -> Rect {
     }
 
     Rect::new(x, f.y, x_w, f.height)
+}
+
+pub fn get_default_column(f: Rect) -> Rect {
+    get_column_with_margin(f, 10, 150)
 }
 
 pub fn get_column_with_margin(f: Rect, margin: u16, threshold: u16) -> Rect {
@@ -53,46 +55,12 @@ pub fn get_header_body_layout(f: Rect, header: u16) -> Vec<Rect> {
         .split(f)
 }
 
-pub fn get_basic_layout<B: Backend>(f: &mut Frame<B>) -> Vec<Rect> {
-    Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage(10),
-            Constraint::Percentage(5),
-            Constraint::Percentage(85)
-            ].as_ref())
-        .split(f.size())
-}
-
 pub fn get_two_row_layout(f: Rect, first: u16) -> Vec<Rect> {
     Layout::default()
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Percentage(first),
             Constraint::Percentage(100 - first)
-            ].as_ref())
-        .split(f)
-}
-
-pub fn get_three_row_layout(f: Rect, first: u16, second: u16) -> Vec<Rect> {
-    Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage(first),
-            Constraint::Percentage(second),
-            Constraint::Percentage(100 - first - second)
-            ].as_ref())
-        .split(f)
-}
-
-pub fn get_three_col_layout(f: Rect, middle: u16) -> Vec<Rect> {
-    let side = (100 - middle) / 2;
-    Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage(side),
-            Constraint::Percentage(middle),
-            Constraint::Percentage(side)
             ].as_ref())
         .split(f)
 }

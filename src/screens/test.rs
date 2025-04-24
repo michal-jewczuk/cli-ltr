@@ -72,7 +72,7 @@ impl Tests {
             ]),
         ];
         let header = layout::get_header(text);
-        let header_area = layout::get_column_with_margin(area, 10, 150);
+        let header_area = layout::get_default_column(area);
     
         f.render_widget(header, header_area);
     }
@@ -80,7 +80,7 @@ impl Tests {
     fn render_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![("[b]", " Home "), ("[q]", " Quit ")];
         let navbar = layout::get_navbar(text);
-        let navbar_area = layout::get_column_with_margin(area, 10, 150);
+        let navbar_area = layout::get_default_column(area);
 
         f.render_widget(navbar, navbar_area);
     }

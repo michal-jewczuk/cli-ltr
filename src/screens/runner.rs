@@ -199,13 +199,13 @@ impl<'a> Runner<'a> {
             ]),
         ];
         let header = layout::get_header(text);
-        let header_area = layout::get_column_with_margin(area, 10, 150);
+        let header_area = layout::get_default_column(area);
     
         f.render_widget(header, header_area);
     }
 
     fn render_start_area<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let start_area = layout::get_column_with_margin(area, 10, 150);
+        let start_area = layout::get_default_column(area);
         let layout = layout::get_header_navbar_layout(start_area, 4, 3);
 
         let instruction = vec![
@@ -225,7 +225,6 @@ impl<'a> Runner<'a> {
     }
 
     fn render_question<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let cols = layout::get_three_col_layout(area, 60);
         let q_time = self.timer_q.elapsed().as_secs();
         let t_time = self.timer_t.elapsed().as_secs();
         let question_l = layout::get_question_area(
@@ -252,7 +251,7 @@ impl<'a> Runner<'a> {
             ]),
         ];
         let header = layout::get_header(text);
-        let header_area = layout::get_column_with_margin(area, 10, 150);
+        let header_area = layout::get_default_column(area);
 
         f.render_widget(header, header_area);
     }
@@ -260,14 +259,14 @@ impl<'a> Runner<'a> {
     fn render_summary_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![("[d]", " Detailed results "), ("[b]", " Back to tests "), ("[q]", " Quit ")];
         let navbar = layout::get_navbar(text);
-        let navbar_area = layout::get_column_with_margin(area, 10, 150);
+        let navbar_area = layout::get_default_column(area);
 
         f.render_widget(navbar, navbar_area);
     }
 
     fn render_summary_body<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let table = layout::render_summary_table(self.result.clone().answers);
-        let table_area = layout::get_column_with_margin(area, 10, 150);
+        let table_area = layout::get_default_column(area);
 
 	f.render_widget(table, table_area);
     }
