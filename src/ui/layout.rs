@@ -150,7 +150,6 @@ pub fn get_navbar<'a>(text: Vec<(&'a str, &'a str)>) -> Paragraph<'a> {
     text.iter().for_each(|t| {
         nb.push(get_navbar_element(t.0, true));
         nb.push(get_navbar_element(t.1, false));
-        //nb.push(Span::styled(" // ", Style::default().add_modifier(Modifier::BOLD)));
         nb.push(Span::styled("__", Style::default().fg(Color::Blue).add_modifier(Modifier::BOLD)));
     });
     nb.pop();
@@ -168,13 +167,16 @@ pub fn get_navbar<'a>(text: Vec<(&'a str, &'a str)>) -> Paragraph<'a> {
 
 pub fn get_test_start_row<'a>(text: Vec<(&'a str, &'a str)>) -> Paragraph<'a> {
     let mut start: Vec<Span> = vec![];
+    let mut invert = false;
 
     text.iter().for_each(|t| {
-        start.push(get_navbar_element(t.0, true));
-        start.push(get_navbar_element(t.1, false));
-        start.push(Span::styled(" // ", Style::default().add_modifier(Modifier::BOLD)));
+        start.push(get_navbar_element(t.0, invert));
+        start.push(get_navbar_element(t.1, !invert));
+        start.push(Span::styled("__", Style::default().fg(Color::Blue).add_modifier(Modifier::BOLD)));
+        invert = true;
     });
     start.pop();
+    start.push(Span::styled(".", Style::default().fg(Color::Blue)));
     Paragraph::new(Spans::from(start))
         .block(Block::default())
         .style(Style::default().bg(Color::Blue))
@@ -250,8 +252,8 @@ pub fn render_summary_table<'a>(answers: Vec<AnswerModel>) -> Table<'a> {
             Row::new(vec![" Number", " Question", " Time", " Correct"])
             .style(Style::default()
                 .add_modifier(Modifier::BOLD)
-                .fg(Color::White)
-                .bg(Color::Blue)
+                .fg(Color::Black)
+                .bg(Color::White)
                 )
             .bottom_margin(1)
         ) 

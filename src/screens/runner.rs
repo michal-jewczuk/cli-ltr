@@ -69,11 +69,11 @@ impl<'a> Runner<'a> {
             self.render_question_page(f);
         } else {
             if self.show_summary {
-                let chunks = layout::get_three_row_layout(f.size(), 10, 10);
+                let layout = layout::get_header_navbar_layout(f.size(), 3, 3);
 
-                self.render_summary_header(f, chunks[0]);
-                self.render_summary_navbar(f, chunks[1]);
-		self.render_summary_body(f, chunks[2]);
+                self.render_summary_header(f, layout[0]);
+                self.render_summary_navbar(f, layout[1]);
+		self.render_summary_body(f, layout[2]);
             } else {
                 let layout = layout::get_header_body_layout(f.size(), 3);
 
@@ -135,7 +135,9 @@ impl<'a> Runner<'a> {
         self.result = ResultModel::new(
             String::from(test_m.id),
             String::from(test_m.title),
-            vec![], 0);
+            vec![], 
+            0
+            );
 
         // should here be a None check?
         let tmp_test = self.item.clone().unwrap();
@@ -164,13 +166,11 @@ impl<'a> Runner<'a> {
             self.result.answers.push(answer);
 
             if self.current_q_number == self.question_count {
-                // test over, show summary
                 self.current_q_number = 0;
                 self.show_summary = true;
                 self.result.total_time = self.timer_t.elapsed().as_secs();
 
             } else {
-                // next question
                 let tmp_test = self.item.clone().unwrap();
                 self.current_q_text = tmp_test.questions[self.current_q_number].question;
                 let answers_list: Vec<String> = tmp_test.questions[self.current_q_number].answers.clone().iter()
@@ -184,10 +184,10 @@ impl<'a> Runner<'a> {
     }
 
     fn render_question_page<B: Backend>(&mut self, f: &mut Frame<B>) {
-        let chunks = layout::get_two_row_layout(f.size(), 40);
+        let layout = layout::get_two_row_layout(f.size(), 40);
 
-        self.render_question(f, chunks[0]);
-        self.render_answers(f, chunks[1]);
+        self.render_question(f, layout[0]);
+        self.render_answers(f, layout[1]);
     }
 
     fn render_test_name<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
@@ -232,39 +232,44 @@ impl<'a> Runner<'a> {
             self.current_q_text, self.current_q_number, self.question_count, q_time, t_time,
             ); 
 
-        f.render_widget(question_l, cols[1]);
+        let q_area = layout::get_column_with_margin(area, 30, 150);
+
+        f.render_widget(question_l, q_area);
     }
 
     fn render_answers<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let cols = layout::get_three_col_layout(area, 60);
         let answers_l = layout::create_navigable_list(self.current_q_answers.items.clone());
+        let a_area = layout::get_column_with_margin(area, 30, 150);
 
-        f.render_stateful_widget(answers_l, cols[1], &mut self.current_q_answers.state);
+        f.render_stateful_widget(answers_l, a_area, &mut self.current_q_answers.state);
     }
 
     fn render_summary_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![
+            Spans::from(Span::raw("")),
             Spans::from(vec![
                 Span::styled("Test summary", Style::default().add_modifier(Modifier::BOLD)),
             ]),
         ];
         let header = layout::get_header(text);
+        let header_area = layout::get_column_with_margin(area, 10, 150);
 
-        f.render_widget(header, area);
+        f.render_widget(header, header_area);
     }
 
     fn render_summary_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![("[d]", " Detailed results "), ("[b]", " Back to tests "), ("[q]", " Quit ")];
         let navbar = layout::get_navbar(text);
+        let navbar_area = layout::get_column_with_margin(area, 10, 150);
 
-        f.render_widget(navbar, area);
+        f.render_widget(navbar, navbar_area);
     }
 
     fn render_summary_body<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let cols = layout::get_three_col_layout(area, 60);
         let table = layout::render_summary_table(self.result.clone().answers);
+        let table_area = layout::get_column_with_margin(area, 10, 150);
 
-	f.render_widget(table, cols[1]);
+	f.render_widget(table, table_area);
     }
 }
 
