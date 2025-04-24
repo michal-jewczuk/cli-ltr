@@ -93,7 +93,8 @@ impl Home {
 
     fn render_menu<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let menu = layout::create_navigable_list(self.menu.items.clone());
-        let menu_area = layout::get_column_with_margin(area, 60, 50);
+        //let menu_area = layout::get_column_with_margin(area, 60, 50);
+        let menu_area = layout::get_adaptative_column(area);
     
         f.render_stateful_widget(menu, menu_area, &mut self.menu.state);
     }

@@ -56,12 +56,15 @@ impl Results {
             f.render_widget(Clear, f.size());
             return;
         }
+        
+        let background = layout::get_background();
+        f.render_widget(background, f.size());
 
         if self.show_details {
-            let chunks = layout::get_two_row_layout(f.size(), 10);
+            let layout = layout::get_header_body_layout(f.size(), 3);
 
-            self.render_details_header(f, chunks[0]);
-            self.render_details_body(f, chunks[1]);
+            self.render_details_header(f, layout[0]);
+            self.render_details_body(f, layout[1]);
         } else {
             self.render_list(f);
         }
@@ -137,11 +140,11 @@ impl Results {
     }
 
     fn render_list<B: Backend>(&mut self, f: &mut Frame<B>) {
-        let chunks = layout::get_three_row_layout(f.size(), 15, 10);
+        let layout = layout::get_header_navbar_layout(f.size(), 3, 3);
 
-        self.render_list_header(f, chunks[0]);
-        self.render_list_navbar(f, chunks[1]);
-        self.render_list_content(f, chunks[2]);
+        self.render_list_header(f, layout[0]);
+        self.render_list_navbar(f, layout[1]);
+        self.render_list_content(f, layout[2]);
     }
 
     fn render_list_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
@@ -155,15 +158,17 @@ impl Results {
         ];
 
         let header = layout::get_header(text);
+        let header_area = layout::get_column_with_margin(area, 10, 150);
     
-        f.render_widget(header, area);
+        f.render_widget(header, header_area);
     }
 
     fn render_list_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![("[b]", " Home "), ("[q]", " Quit ")];
         let navbar = layout::get_navbar(text);
+        let navbar_area = layout::get_column_with_margin(area, 10, 150);
 
-        f.render_widget(navbar, area);
+        f.render_widget(navbar, navbar_area);
     }
 
     fn render_list_content<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
@@ -179,25 +184,27 @@ impl Results {
             Spans::from(Span::styled(self.item.clone().unwrap().title, Style::default().add_modifier(Modifier::BOLD))),
         ];
         let header = layout::get_header(text);
+        let header_area = layout::get_column_with_margin(area, 10, 150);
     
-        f.render_widget(header, area);
+        f.render_widget(header, header_area);
     }
 
     fn render_details_body<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let q = self.current_q.clone().unwrap();
 
-        let cols = layout::get_three_col_layout(area, 80);
-        let chunks = layout::get_two_row_layout(cols[1], 10);
+        let layout = layout::get_header_body_layout(area, 3);
 
         let navbar_b = vec![
             ("[RIGHT]", " Next "), ("[LEFT]", " Previous "), ("[b]", " Back to list "), ("[q]", " Quit "),
         ];
         let navbar = layout::get_navbar(navbar_b);
-        f.render_widget(navbar, chunks[0]);
+        let navbar_area = layout::get_column_with_margin(layout[0], 10, 150);
+        f.render_widget(navbar, navbar_area);
 
+        let content_area = layout::get_column_with_margin(layout[1], 20, 150);
         if self.current_q_idx == self.count_q {
             let summary = layout::render_summary_table(self.item.clone().unwrap().answers);
-            f.render_widget(summary, chunks[1]);
+            f.render_widget(summary, content_area);
         } else {
             let mut aidx = 0;
             let answers_spans = q.answers.iter()
@@ -217,7 +224,7 @@ impl Results {
                 .collect::<Vec<Spans>>();
 
             let answers_page = layout::get_results_q_page(self.current_q_idx + 1, self.count_q, q.question, answers_spans, q.time);
-            f.render_widget(answers_page, chunks[1]);
+            f.render_widget(answers_page, content_area);
         }
     }
 }
