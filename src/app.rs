@@ -100,6 +100,11 @@ impl App<'_> {
                         self.runner = runner::Runner::new(test_model);
                         self.current_screen = ScreenType::Runner;
                     },
+                    // TODO remove this poc
+                    ScreenType::Home => {
+                        self.home.update_locale(String::from("pl"));
+                        self.current_screen = ScreenType::Home;
+                    },
                     _ => self.current_screen = screen 
                 }
             },
@@ -111,6 +116,11 @@ impl App<'_> {
                         let test_model = testservice::get_by_id(test_id);
                         self.runner = runner::Runner::new(test_model);
                         self.current_screen = ScreenType::Runner;
+                    },
+                    // TODO remove this poc
+                    ScreenType::Home => {
+                        self.home.update_locale(String::from("en"));
+                        self.current_screen = ScreenType::Home;
                     },
                     _ => self.current_screen = screen
                 }

@@ -14,19 +14,15 @@ use rust_i18n::t;
 
 pub struct Home {
     pub first_render: bool,
+    locale: String,
     menu: Menu,
 }
 
 impl Home {
     pub fn new() -> Self {
-        let menu_items = vec![
-            format!("[t] {}", t!("menu.tests", locale = "pl")),
-            format!("[r] {}", t!("menu.results", locale = "pl")),
-            format!("[d] {}", t!("menu.redo", locale = "pl")),
-            format!("[h] {}", t!("menu.help", locale = "pl")),
-            format!("[q] {}", t!("menu.exit", locale = "pl")),
-        ];
-        Home { first_render: true, menu: Menu::new(menu_items) }
+        let mut home = Home { first_render: true, menu: Menu::new(vec![]), locale: String::from("")};
+        home.update_locale(String::from("en"));
+        home
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
@@ -59,6 +55,18 @@ impl Home {
         ScreenType::Home
     }
 
+    pub fn update_locale(&mut self, locale: String) {
+        self.locale = locale;
+        let menu_items = vec![
+            format!("[t] {}", t!("menu.tests", locale = &self.locale)),
+            format!("[r] {}", t!("menu.results", locale = &self.locale)),
+            format!("[d] {}", t!("menu.redo", locale = &self.locale)),
+            format!("[h] {}", t!("menu.help", locale = &self.locale)),
+            format!("[q] {}", t!("menu.exit", locale = &self.locale)),
+        ];
+        self.menu = Menu::new(menu_items);
+    }
+
     fn handle_enter(&mut self) -> ScreenType {
         match self.menu.state.selected() {
             Some(screen) => {
@@ -80,9 +88,9 @@ impl Home {
         let text = vec![
             header_border.clone(),
             Spans::from(vec![
-                Span::raw(t!("title.home", locale = "pl")),
+                Span::raw(t!("title.home", locale = &self.locale)),
                 Span::raw(" "),
-                Span::styled(t!("name.full", locale = "pl"), Style::default().add_modifier(Modifier::BOLD)),
+                Span::styled(t!("name.full", locale = &self.locale), Style::default().add_modifier(Modifier::BOLD)),
                 Span::raw(format!(" [{}]", t!("name.short"))),
             ]),
             header_border.clone(),
@@ -96,8 +104,8 @@ impl Home {
 
     fn render_menu_instructions<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![
-            Spans::from(Span::raw(t!("home.instruction.l1", locale = "pl"))),
-            Spans::from(Span::raw(t!("home.instruction.l2", locale = "pl"))),
+            Spans::from(Span::raw(t!("home.instruction.l1", locale = &self.locale))),
+            Spans::from(Span::raw(t!("home.instruction.l2", locale = &self.locale))),
         ];
         let instructions = layout::get_par_with_borders(text);
         let instructions_area = layout::get_default_column(area);
