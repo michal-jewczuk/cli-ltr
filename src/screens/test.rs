@@ -55,9 +55,7 @@ impl Tests {
 
     fn handle_enter(&mut self) -> (ScreenType, String) {
         match self.list.state.selected() {
-            Some(idx) => {
-                (ScreenType::Runner, self.items[idx].0.to_string())
-            },
+            Some(idx) => (ScreenType::Runner, self.items[idx].0.to_string()),
             None => (ScreenType::Tests, String::from(""))
         }
     }

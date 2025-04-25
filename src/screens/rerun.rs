@@ -1,5 +1,5 @@
 use crate::app::ScreenType;
-use crate::ui::layout;
+use crate::ui::{layout, menu::Menu};
 
 use tui::{
     backend::Backend,
@@ -13,11 +13,16 @@ use crossterm::event::{KeyCode};
 
 pub struct Rerun {
     pub first_render: bool,
+    items: Vec<(String, String)>,
+    list: Menu,
 }
 
 impl Rerun {
-    pub fn new() -> Self {
-        Rerun {first_render: true}
+    pub fn new(items: Vec<(String, String)>) -> Self {
+        let names: Vec<String> = items.iter()
+            .map(|t| t.1.clone())
+            .collect();
+         Rerun{ first_render: true, items: items, list: Menu::new(names) }
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
@@ -34,14 +39,25 @@ impl Rerun {
 
         self.render_header(f, layout[0]);
         self.render_navbar(f, layout[1]);
+        self.render_test_items(f, layout[2]);
     }
 
-    pub fn handle_key_code(&mut self, code: KeyCode) -> ScreenType {
+    pub fn handle_key_code(&mut self, code: KeyCode) -> (ScreenType, String) {
         match code {
-            KeyCode::Char('b') | KeyCode::Char('B') => return ScreenType::Home,
+            KeyCode::Char('b') | KeyCode::Char('B') => return (ScreenType::Home, String::from("")),
+            KeyCode::Up => self.list.previous(),
+            KeyCode::Down => self.list.next(),
+            KeyCode::Enter => return self.handle_enter(),
             _ => {}
         } 
-        ScreenType::Rerun
+        (ScreenType::Rerun, String::from(""))
+    }
+
+    fn handle_enter(&mut self) -> (ScreenType, String) {
+        match self.list.state.selected() {
+            Some(idx) => (ScreenType::Runner, self.items[idx].0.to_string()),
+            None => (ScreenType::Rerun, String::from(""))
+        }
     }
 
     fn render_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
@@ -65,6 +81,13 @@ impl Rerun {
         let navbar_area = layout::get_default_column(area);
 
         f.render_widget(navbar, navbar_area);
+    }
+
+    fn render_test_items<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
+        let list = layout::create_navigable_list(self.list.items.clone());
+        let list_area = layout::get_adaptative_column(area);
+
+        f.render_stateful_widget(list, list_area, &mut self.list.state);
     }
 }
 

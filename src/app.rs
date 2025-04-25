@@ -34,13 +34,14 @@ pub struct App<'a> {
 impl App<'_> {
     pub fn new() -> Self {
 	let tests_to_do = testservice::get_to_do();
+        let tests_finished = testservice::get_results_list();
         App { 
             is_finished: false,
             current_screen: ScreenType::Home,
             home: home::Home::new(),
             tests: test::Tests::new(tests_to_do),
             results: results::Results::new(None),
-            rerun: rerun::Rerun::new(),
+            rerun: rerun::Rerun::new(tests_finished),
             help: help::Help::new(),
             runner: runner::Runner::new(None),
         }
@@ -103,7 +104,17 @@ impl App<'_> {
                 }
             },
             ScreenType::Results => self.current_screen = self.results.handle_key_code(code),
-            ScreenType::Rerun => self.current_screen = self.rerun.handle_key_code(code),
+            ScreenType::Rerun => {
+                let (screen, test_id) = self.rerun.handle_key_code(code);
+                match screen {
+                    ScreenType::Runner => {
+                        let test_model = testservice::get_by_id(test_id);
+                        self.runner = runner::Runner::new(test_model);
+                        self.current_screen = ScreenType::Runner;
+                    },
+                    _ => self.current_screen = screen
+                }
+            },
             ScreenType::Runner => {
                 let (screen, result) = self.runner.handle_key_code(code);
                 match screen {

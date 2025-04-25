@@ -60,12 +60,186 @@ pub fn get_by_id<'a>(id: String) -> Option<test::TestModel<'a>> {
             id: "abc",
             title: "[2025-02-28] Verbs and stuff",
             questions: vec![
+                test::QuestionModel::new(
+                    "How would you tell somebody to go and do something?",
+                    vec![
+                        "Could you just move, please?",
+                        "Just do it!",
+                        "Move your behind and get the shit done",
+                        "Just stay there and let things happen on their own",
+                    ],
+                    0,
+                ),
+                test::QuestionModel::new(
+                    "... through pink glasses.",
+                    vec![
+                        "Sees",
+                        "Look",
+                        "View",
+                        "He see",
+                    ],
+                    1,
+                ),
+                test::QuestionModel::new(
+                    "Why do policemen walk in paris?",
+                    vec![
+                        "To arrest you twice as fast for hate speech",
+                        "Who could possibly know that",
+                        "Two is better than one",
+                        "One can read and the other can write",
+                    ],
+                    3,
+                ),
             ],
         },
         test::TestModel {
             id: "cde",
             title: "[2025-02-27] Week exam #2",
             questions: vec![
+                test::QuestionModel::new(
+                    "I wish you ... so dumm.",
+                    vec![
+                        "is",
+                        "weren't",
+                        "was not",
+                        "were",
+                    ],
+                    1,
+                ),
+                test::QuestionModel::new(
+                    "What is the best way to describe the following situation: A woman in her late twentees or early thirties is walking down the street early mornig. Her hair are a mess, her make up is well, like her hair and she is holding her high heels in one hand while covering her face with the other.",
+                    vec![
+                        "Early morning jogging",
+                        "Stroll through the park",
+                        "Walk of shame",
+                        "My kind of a woman",
+                    ],
+                    2,
+                ),
+                test::QuestionModel::new(
+                    "What could be your reaction to learning the correct answer to the previouis question? Pick the one that fits best.",
+                    vec![
+                        "I should have known that!",
+                        "Really? I had no idea!",
+                        "So it was not my kind of a woman?",
+                        "One of the above",
+                    ],
+                    3,
+                ),
+                test::QuestionModel::new(
+                    "What is the proper way to say it: '3 + 3' 'is six' or 'are six'?",
+                    vec![
+                        "is six",
+                        "are six",
+                        "is nine",
+                        "math? oh, come on!",
+                    ],
+                    2,
+                ),
+            ],
+        },
+        test::TestModel {
+            id: "r_1",
+            title: "[2025-01-03] Week exam #1",
+            questions: vec![
+                test::QuestionModel::new(
+                    "Are you in the right class?",
+                    vec![
+                        "Yes",
+                        "No",
+                        "I have no idea",
+                        "Maybe",
+                    ],
+                    0,
+                ),
+            ],
+        },
+        test::TestModel {
+            id: "r_2",
+            title: "[2025-01-03] Adjectives",
+            questions: vec![
+                test::QuestionModel::new(
+                    "Less is more. True or false?",
+                    vec![
+                        "True",
+                        "False",
+                        "I have no idea",
+                        "It depends",
+                    ],
+                    3,
+                ),
+                test::QuestionModel::new(
+                    "The grass is always ... on the other side",
+                    vec![
+                        "bigger",
+                        "greener",
+                        "bushier",
+                        "green",
+                    ],
+                    1,
+                ),
+                test::QuestionModel::new(
+                    "If he is younger than me then I am ... than him",
+                    vec![
+                        "as young as",
+                        "younger",
+                        "old",
+                        "older",
+                    ],
+                    3,
+                ),
+            ],
+        },
+        test::TestModel {
+            id: "r_3",
+            title: "[2025-01-08] Reading between the lines",
+            questions: vec![
+                test::QuestionModel::new(
+                    "A deep dive into something means",
+                    vec![
+                        "to swim underwater really deep",
+                        "to jump into water from a high place",
+                        "to focus someones attention on one topic in order to understand it very well",
+                        "all of the above",
+                    ],
+                    2,
+                ),
+                test::QuestionModel::new(
+                    "Which number cannot be represented by the phrase: 'two four two zero'",
+                    vec![
+                        "2440",
+                        "4420",
+                        "4400",
+                        "2420",
+                    ],
+                    0,
+                ),
+            ],
+        },
+        test::TestModel {
+            id: "r_4",
+            title: "[2025-01-12] Nouns or nuns",
+            questions: vec![
+                test::QuestionModel::new(
+                    "What is a truck?",
+                    vec![
+                        "a car but not a car, a bigger car",
+                        "lower part of the tree",
+                        "a main branch in git repository",
+                        "a vihickle",
+                    ],
+                    0,
+                ),
+                test::QuestionModel::new(
+                    "Swims on water and donald is the name",
+                    vec![
+                        "dack",
+                        "dak",
+                        "duck",
+                        "chicken",
+                    ],
+                    2,
+                ),
             ],
         },
     ].iter()
@@ -114,8 +288,8 @@ pub fn get_results_by_id(id: String) -> Option<test::ResultModel> {
                         String::from("I have no idea"),
                         String::from("It depends"),
                     ],
-                    0,
-                    Some(3),
+                    3,
+                    Some(2),
                     false,
                     66 
                 ),
