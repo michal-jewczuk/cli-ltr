@@ -1,0 +1,41 @@
+_version: 2
+name.full:
+  en: Command Line Language Test Runner
+  pl: Językowy Tester Uruchamiany W Konsoli
+name.short:
+  en: CLI LTR
+  pl: CLI LTR
+
+# PAGE TITLES
+title.home:
+  en: Welcome to 
+  pl: Witaj w programie 
+title.test:
+  en: New tests
+  pl: Nowe testy
+
+# PAGE CONTENTS
+home.instruction.l1:
+  en: You can use UP or DOWN arrows to navigate through menu items and ENTER to confirm
+  pl: Możesz użyć strzałek GÓRA i DÓŁ by zmieniać pozycję kursora i ENTER by wybrać 
+home.instruction.l2:
+  en: or you can use the specified key shortcut to instantly confirm
+  pl: albo możesz wcisnąć dedykowany skrót klawiszowy by wybrać bezpośrednio
+
+# MENU ITEMS
+menu.tests:
+  en: Tests
+  pl: Testy
+menu.results:
+  en: Result
+  pl: Wyniki
+menu.redo:
+  en: Redo
+  pl: Powtórki
+menu.help:
+  en: Help
+  pl: Pomoc
+menu.exit:
+  en: Exit
+  pl: Wyjdź
+

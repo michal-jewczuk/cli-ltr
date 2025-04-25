@@ -10,6 +10,7 @@ use tui::{
     Frame,
 };
 use crossterm::event::{KeyCode};
+use rust_i18n::t;
 
 pub struct Home {
     pub first_render: bool,
@@ -18,7 +19,14 @@ pub struct Home {
 
 impl Home {
     pub fn new() -> Self {
-        Home { first_render: true, menu: Menu::home() }
+        let menu_items = vec![
+            format!("[t] {}", t!("menu.tests", locale = "pl")),
+            format!("[r] {}", t!("menu.results", locale = "pl")),
+            format!("[d] {}", t!("menu.redo", locale = "pl")),
+            format!("[h] {}", t!("menu.help", locale = "pl")),
+            format!("[q] {}", t!("menu.exit", locale = "pl")),
+        ];
+        Home { first_render: true, menu: Menu::new(menu_items) }
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
@@ -68,8 +76,10 @@ impl Home {
         let text = vec![
             header_border.clone(),
             Spans::from(vec![
-                Span::raw("WELCOME TO "),
-                Span::styled("CLI Language Test Runner", Style::default().add_modifier(Modifier::BOLD)),
+                Span::raw(t!("title.home", locale = "pl")),
+                Span::raw(" "),
+                Span::styled(t!("name.full", locale = "pl"), Style::default().add_modifier(Modifier::BOLD)),
+                Span::raw(format!(" [{}]", t!("name.short"))),
             ]),
             header_border.clone(),
         ];
@@ -82,8 +92,8 @@ impl Home {
 
     fn render_menu_instructions<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![
-            Spans::from(Span::raw("You can use UP or DOWN arrows to navigate through menu items and ENTER to confirm")),
-            Spans::from(Span::raw("or you can use the specified key shortcut to instantly confirm")),
+            Spans::from(Span::raw(t!("home.instruction.l1", locale = "pl"))),
+            Spans::from(Span::raw(t!("home.instruction.l2", locale = "pl"))),
         ];
         let instructions = layout::get_par_with_borders(text);
         let instructions_area = layout::get_default_column(area);

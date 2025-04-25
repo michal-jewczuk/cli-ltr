@@ -7,18 +7,6 @@ pub struct Menu {
 
 
 impl Menu {
-    pub fn home() -> Self {
-        let items = vec![
-            String::from("[t] Tests"),
-            String::from("[r] Results"),
-            String::from("[d] Redo"),
-            String::from("[h] Help"),
-            String::from("[q] Exit"),
-        ];
-        Self::new(items)
-    }
-
-
     pub fn new(items: Vec<String>) -> Self {
         let mut state = ListState::default();
         if items.len() > 0 {

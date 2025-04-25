@@ -6,4 +6,5 @@ edition = "2024"
 [dependencies]
 tui = "0.19"
 crossterm = "0.25"
+rust-i18n = "3.1.4"
 

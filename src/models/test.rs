@@ -40,7 +40,7 @@ impl<'a> QuestionModel<'a> {
         match answer {
 	    None => return false,
 	    Some(a) => {
-		if a == self.correct.into() {
+		if a == usize::from(self.correct) {
 		    true
 		} else {
 		    false

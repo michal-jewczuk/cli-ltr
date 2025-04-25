@@ -206,14 +206,15 @@ impl Results {
             let summary = layout::render_summary_table(self.item.clone().unwrap().answers);
             f.render_widget(summary, content_area);
         } else {
-            let mut aidx = 0;
+            let mut aidx: usize = 0;
             let answers_spans = q.answers.iter()
                 .map(|a| {
                     let mut color = Color::Black;
                     if aidx == q.given.unwrap() {
                         color = Color::Red;
                     }
-                    if aidx == q.correct.into() {
+                    //if aidx == q.correct.into() {
+                    if aidx == usize::from(q.correct) {
                         color = Color::Green;
                     }
                     aidx += 1;
