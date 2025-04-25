@@ -50,6 +50,10 @@ impl Home {
             KeyCode::Up => self.menu.previous(),
             KeyCode::Down => self.menu.next(),
             KeyCode::Enter => return self.handle_enter(),
+            KeyCode::Char('t') | KeyCode::Char('T') => return ScreenType::Tests,
+            KeyCode::Char('r') | KeyCode::Char('R') => return ScreenType::Results,
+            KeyCode::Char('d') | KeyCode::Char('D') => return ScreenType::Rerun,
+            KeyCode::Char('h') | KeyCode::Char('H') => return ScreenType::Help,
             _ => {} 
         }
         ScreenType::Home
