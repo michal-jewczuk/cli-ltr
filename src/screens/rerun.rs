@@ -1,5 +1,5 @@
 use crate::app::ScreenType;
-use crate::ui::{layout, menu::Menu};
+use crate::ui::{layout, menu::Menu, navbar, navbar::NavType};
 
 use tui::{
     backend::Backend,
@@ -78,8 +78,8 @@ impl Rerun {
     }
 
     fn render_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let text = vec![("[b]", " Home "), ("[q]", " Quit ")];
-        let navbar = layout::get_navbar(text);
+        let navbar_e = navbar::get_elements(vec![NavType::Back, NavType::Quit], self.locale.clone());
+        let navbar = layout::get_navbar(navbar_e);
         let navbar_area = layout::get_default_column(area);
 
         f.render_widget(navbar, navbar_area);

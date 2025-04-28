@@ -1,5 +1,5 @@
 use crate::app::ScreenType;
-use crate::ui::{layout, menu::Menu};
+use crate::ui::{layout, menu::Menu, navbar, navbar::NavType};
 use crate::models::test::{TestModel, ResultModel, AnswerModel};
 
 use std::time::{Instant};
@@ -222,8 +222,9 @@ impl<'a> Runner<'a> {
         let instruction_p = layout::get_par_with_colors(instruction, Color::White, Color::Blue);
         f.render_widget(instruction_p, layout[0]);
 
-        let text = vec![("[s]", " Start "), ("[b]", " Back "), ("[q]", " Quit ")];
-        let start_buttons = layout::get_test_start_row(text);
+        //let text = vec![("[s]", " Start "), ("[b]", " Back "), ("[q]", " Quit ")];
+        let start_e = navbar::get_elements(vec![NavType::Start, NavType::Back, NavType::Quit], self.locale.clone());
+        let start_buttons = layout::get_test_start_row(start_e);
         f.render_widget(start_buttons, layout[1]);
     }
 
@@ -260,8 +261,8 @@ impl<'a> Runner<'a> {
     }
 
     fn render_summary_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let text = vec![("[d]", " Detailed results "), ("[b]", " Back to tests "), ("[q]", " Quit ")];
-        let navbar = layout::get_navbar(text);
+        let navbar_e = navbar::get_elements(vec![NavType::Details, NavType::Back, NavType::Quit], self.locale.clone());
+        let navbar = layout::get_navbar(navbar_e);
         let navbar_area = layout::get_default_column(area);
 
         f.render_widget(navbar, navbar_area);

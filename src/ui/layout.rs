@@ -109,13 +109,12 @@ pub fn get_header(text: Vec<Spans>) -> Paragraph {
         .wrap(Wrap { trim: true })
 }
 
-pub fn get_navbar<'a>(text: Vec<(&'a str, &'a str)>) -> Paragraph<'a> {
+pub fn get_navbar(text: Vec<(String, String)>) -> Paragraph<'static> {
+    // start and end with dot to force space display
     let mut nb = vec![
         Span::styled(".", Style::default().fg(Color::Blue)),
-        get_navbar_element(" Navigation: ", false),
-        Span::raw(" "),
     ];
-    text.iter().for_each(|t| {
+    text.into_iter().for_each(|t| {
         nb.push(get_navbar_element(t.0, true));
         nb.push(get_navbar_element(t.1, false));
         nb.push(Span::styled("__", Style::default().fg(Color::Blue).add_modifier(Modifier::BOLD)));
@@ -133,11 +132,11 @@ pub fn get_navbar<'a>(text: Vec<(&'a str, &'a str)>) -> Paragraph<'a> {
         .wrap(Wrap { trim: true })
 }
 
-pub fn get_test_start_row<'a>(text: Vec<(&'a str, &'a str)>) -> Paragraph<'a> {
+pub fn get_test_start_row(text: Vec<(String, String)>) -> Paragraph<'static> {
     let mut start: Vec<Span> = vec![];
     let mut invert = false;
 
-    text.iter().for_each(|t| {
+    text.into_iter().for_each(|t| {
         start.push(get_navbar_element(t.0, invert));
         start.push(get_navbar_element(t.1, !invert));
         start.push(Span::styled("__", Style::default().fg(Color::Blue).add_modifier(Modifier::BOLD)));
@@ -152,7 +151,7 @@ pub fn get_test_start_row<'a>(text: Vec<(&'a str, &'a str)>) -> Paragraph<'a> {
         .wrap(Wrap { trim: true })
 }
 
-fn get_navbar_element(text: &str, primary: bool) -> Span {
+fn get_navbar_element(text: String, primary: bool) -> Span<'static> {
     if primary {
         Span::styled(text, Style::default().bg(Color::Black).fg(Color::White))
     } else {

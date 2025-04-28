@@ -61,13 +61,22 @@ menu.exit:
 navigation.main:
   en: Navigation
   pl: Skróty
-navigation.home:
-  en: Home
-  pl: Strona główna
 navigation.back:
   en: Back
   pl: Powrót
 navigation.quit:
   en: Quit
   pl: Wyjdź
+navigation.details:
+  en: Details
+  pl: Szczegóły
+navigation.next:
+  en: Next
+  pl: Następne
+navigation.previous:
+  en: Previous
+  pl: Poprzednie
+navigation.start:
+  en: Start
+  pl: Rozpocznij
 

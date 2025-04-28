@@ -1,5 +1,5 @@
 use crate::app::ScreenType;
-use crate::ui::{layout, menu::Menu};
+use crate::ui::{layout, menu::Menu, navbar, navbar::NavType};
 use crate::models::test::{AnswerModel, ResultModel};
 use crate::service::testservice;
 
@@ -167,8 +167,8 @@ impl Results {
     }
 
     fn render_list_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let text = vec![("[b]", " Home "), ("[q]", " Quit ")];
-        let navbar = layout::get_navbar(text);
+        let navbar_e = navbar::get_elements(vec![NavType::Back, NavType::Quit], self.locale.clone());
+        let navbar = layout::get_navbar(navbar_e);
         let navbar_area = layout::get_default_column(area);
 
         f.render_widget(navbar, navbar_area);
@@ -197,9 +197,10 @@ impl Results {
 
         let layout = layout::get_header_body_layout(area, 3);
 
-        let navbar_b = vec![
-            ("[RIGHT]", " Next "), ("[LEFT]", " Previous "), ("[b]", " Back to list "), ("[q]", " Quit "),
-        ];
+        let navbar_b = navbar::get_elements(
+            vec![NavType::Next, NavType::Previous, NavType::Back, NavType::Quit],
+            self.locale.clone()
+        );
         let navbar = layout::get_navbar(navbar_b);
         let navbar_area = layout::get_default_column(layout[0]);
         f.render_widget(navbar, navbar_area);
