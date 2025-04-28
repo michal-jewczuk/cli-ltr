@@ -10,9 +10,15 @@ name.short:
 title.home:
   en: Welcome to 
   pl: Witaj w programie 
-title.test:
+title.tests:
   en: New tests
   pl: Nowe testy
+title.rerun:
+  en: Rerun finished tests
+  pl: Przetestuj jeszcze raz
+title.results:
+  en: Display results
+  pl: Wyświetl wyniki
 
 # PAGE CONTENTS
 home.instruction.l1:
@@ -21,13 +27,25 @@ home.instruction.l1:
 home.instruction.l2:
   en: or you can use the specified key shortcut to instantly confirm
   pl: albo możesz wcisnąć dedykowany skrót klawiszowy by wybrać bezpośrednio
+runner.start:
+  en: Do you want to start the test?
+  pl: Chcesz rozpocząć test?
+runner.note.l1:
+  en: "Please note: "
+  pl: "Zwróć uwagę: "
+runner.note.l2:
+  en: once started, the test must be finished!
+  pl: test musi być ukończony po rozpoczęciu!
+results.for:
+  en: "Results for:"
+  pl: "Wyniki dla: "
 
 # MENU ITEMS
 menu.tests:
   en: Tests
   pl: Testy
 menu.results:
-  en: Result
+  en: Results
   pl: Wyniki
 menu.redo:
   en: Redo
@@ -37,5 +55,19 @@ menu.help:
   pl: Pomoc
 menu.exit:
   en: Exit
+  pl: Wyjdź
+
+# NAVIGATION
+navigation.main:
+  en: Navigation
+  pl: Skróty
+navigation.home:
+  en: Home
+  pl: Strona główna
+navigation.back:
+  en: Back
+  pl: Powrót
+navigation.quit:
+  en: Quit
   pl: Wyjdź
 

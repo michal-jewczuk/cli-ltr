@@ -12,9 +12,11 @@ use tui::{
     Frame,
 };
 use crossterm::event::{KeyCode};
+use rust_i18n::t;
 
 pub struct Results {
     pub first_render: bool,
+    pub locale: String,
     item: Option<ResultModel>,
     show_details: bool,
     current_q_idx: usize,
@@ -25,7 +27,7 @@ pub struct Results {
 }
 
 impl Results {
-    pub fn new(item: Option<ResultModel>) -> Self {
+    pub fn new(item: Option<ResultModel>, locale: String) -> Self {
         let mut show_details = true;
         let mut count_q = 0;
         let results_items = testservice::get_results_list();
@@ -35,6 +37,7 @@ impl Results {
         }
         Results {
             first_render: true,
+            locale,
             item,
             show_details,
             current_q_idx: 0,
@@ -151,9 +154,9 @@ impl Results {
         let text = vec![
             Spans::from(Span::raw("")),
             Spans::from(vec![
-                Span::styled("CLI LTR", Style::default().add_modifier(Modifier::BOLD)),
+                Span::styled(t!("name.short", locale = &self.locale), Style::default().add_modifier(Modifier::BOLD)),
                 Span::raw(" - "),
-                Span::raw("Display results")
+                Span::raw(t!("title.results", locale = &self.locale))
             ]),
         ];
 
@@ -180,7 +183,7 @@ impl Results {
 
     fn render_details_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
         let text = vec![
-            Spans::from(Span::raw("Results for:")),
+            Spans::from(Span::raw(t!("results.for", locale = &self.locale))),
             Spans::from(Span::styled(self.item.clone().unwrap().title, Style::default().add_modifier(Modifier::BOLD))),
         ];
         let header = layout::get_header(text);

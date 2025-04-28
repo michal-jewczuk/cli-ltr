@@ -35,15 +35,17 @@ impl App<'_> {
     pub fn new() -> Self {
 	let tests_to_do = testservice::get_to_do();
         let tests_finished = testservice::get_results_list();
+        // TODO move locales to App field
+        // after all usage is done in screens
         App { 
             is_finished: false,
             current_screen: ScreenType::Home,
             home: home::Home::new(),
-            tests: test::Tests::new(tests_to_do),
-            results: results::Results::new(None),
-            rerun: rerun::Rerun::new(tests_finished),
+            tests: test::Tests::new(tests_to_do, String::from("en")),
+            results: results::Results::new(None, String::from("en")),
+            rerun: rerun::Rerun::new(tests_finished, String::from("en")),
             help: help::Help::new(),
-            runner: runner::Runner::new(None),
+            runner: runner::Runner::new(None, String::from("en")),
         }
     }
 
@@ -97,7 +99,7 @@ impl App<'_> {
                 match screen {
                     ScreenType::Runner => {
                         let test_model = testservice::get_by_id(test_id);
-                        self.runner = runner::Runner::new(test_model);
+                        self.runner = runner::Runner::new(test_model, String::from("en"));
                         self.current_screen = ScreenType::Runner;
                     },
                     // TODO remove this poc
@@ -114,7 +116,7 @@ impl App<'_> {
                 match screen {
                     ScreenType::Runner => {
                         let test_model = testservice::get_by_id(test_id);
-                        self.runner = runner::Runner::new(test_model);
+                        self.runner = runner::Runner::new(test_model, String::from("en"));
                         self.current_screen = ScreenType::Runner;
                     },
                     // TODO remove this poc
@@ -129,7 +131,7 @@ impl App<'_> {
                 let (screen, result) = self.runner.handle_key_code(code);
                 match screen {
                     ScreenType::Results => {
-                        self.results = results::Results::new(result.clone());
+                        self.results = results::Results::new(result.clone(), String::from("en"));
                         self.current_screen = ScreenType::Results
                     },
                     _ => self.current_screen = screen

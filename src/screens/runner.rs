@@ -13,9 +13,11 @@ use tui::{
     Frame,
 };
 use crossterm::event::{KeyCode};
+use rust_i18n::t;
 
 pub struct Runner<'a> {
     pub first_render: bool,
+    pub locale: String,
     item: Option<TestModel<'a>>,
     current_q_number: usize,
     current_q_text: &'a str,
@@ -28,13 +30,14 @@ pub struct Runner<'a> {
 }
 
 impl<'a> Runner<'a> {
-    pub fn new(item: Option<TestModel<'a>>) -> Self {
+    pub fn new(item: Option<TestModel<'a>>, locale: String) -> Self {
          let mut question_count = 0; 
          if !item.is_none() {
              question_count = item.clone().unwrap().questions.len();
          }
          Runner {
              first_render: true,
+             locale: locale,
              item, 
              current_q_number: 0,
              current_q_text: "",
@@ -210,10 +213,10 @@ impl<'a> Runner<'a> {
 
         let instruction = vec![
             Spans::from(Span::raw("")),
-            Spans::from(Span::raw("Do you want to start the test?")),
+            Spans::from(Span::raw(t!("runner.start", locale = &self.locale))),
             Spans::from(vec![
-                Span::styled("Please note: ", Style::default().add_modifier(Modifier::BOLD)),
-                Span::raw("once started, the test must be finished!"),
+                Span::styled(t!("runner.note.l1", locale = &self.locale), Style::default().add_modifier(Modifier::BOLD)),
+                Span::raw(t!("runner.note.l2", locale = &self.locale)),
             ])
         ];
         let instruction_p = layout::get_par_with_colors(instruction, Color::White, Color::Blue);

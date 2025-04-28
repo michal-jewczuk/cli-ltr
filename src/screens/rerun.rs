@@ -10,19 +10,21 @@ use tui::{
     Frame,
 };
 use crossterm::event::{KeyCode};
+use rust_i18n::t;
 
 pub struct Rerun {
     pub first_render: bool,
+    pub locale: String,
     items: Vec<(String, String)>,
     list: Menu,
 }
 
 impl Rerun {
-    pub fn new(items: Vec<(String, String)>) -> Self {
+    pub fn new(items: Vec<(String, String)>, locale: String) -> Self {
         let names: Vec<String> = items.iter()
             .map(|t| t.1.clone())
             .collect();
-         Rerun{ first_render: true, items: items, list: Menu::new(names) }
+         Rerun{ first_render: true, locale: locale, items: items, list: Menu::new(names) }
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
@@ -64,9 +66,9 @@ impl Rerun {
         let text = vec![
             Spans::from(Span::raw("")),
             Spans::from(vec![
-                Span::styled("CLI LTR", Style::default().add_modifier(Modifier::BOLD)),
+                Span::styled(t!("name.short", locale = &self.locale), Style::default().add_modifier(Modifier::BOLD)),
                 Span::raw(" - "),
-                Span::raw("Rerun finished tests")
+                Span::raw(t!("title.rerun", locale = &self.locale)),
             ]),
         ];
         let header = layout::get_header(text);
