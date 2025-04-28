@@ -101,7 +101,11 @@ impl<'a> Runner<'a> {
                     return (ScreenType::Quit, None);
                 }
             },
-            KeyCode::Char('s') | KeyCode::Char('S') => return self.start_test(),
+            KeyCode::Char('s') | KeyCode::Char('S') => {
+                if !self.is_running() && !self.show_summary {
+                    return self.start_test()
+                }
+            },
             KeyCode::Up => {
                 if self.is_running() {
                     self.current_q_answers.previous()
@@ -222,7 +226,6 @@ impl<'a> Runner<'a> {
         let instruction_p = layout::get_par_with_colors(instruction, Color::White, Color::Blue);
         f.render_widget(instruction_p, layout[0]);
 
-        //let text = vec![("[s]", " Start "), ("[b]", " Back "), ("[q]", " Quit ")];
         let start_e = navbar::get_elements(vec![NavType::Start, NavType::Back, NavType::Quit], self.locale.clone());
         let start_buttons = layout::get_test_start_row(start_e);
         f.render_widget(start_buttons, layout[1]);
