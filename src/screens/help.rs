@@ -1,5 +1,5 @@
 use crate::app::ScreenType;
-use crate::ui::{layout, navbar, navbar::NavType};
+use crate::ui::{layout, menu::Menu, navbar, navbar::NavType};
 
 use tui::{
     backend::Backend,
@@ -17,13 +17,26 @@ pub struct Help {
     pub locale: String,
     all_locales: Vec<(String, String)>,
     lang_name: String,
+    switch_mode: bool,
+    langs: Menu,
 }
 
 impl Help {
     pub fn new(locale: String, all_locales: Vec<(String, String)>) -> Self {
         let lang_name = all_locales.iter()
             .find(|t| t.0 == locale).unwrap().1.clone();
-        Help {first_render: true, locale, all_locales, lang_name}
+        let names: Vec<String> = all_locales.iter()
+            .map(|t| t.1.clone())
+            .collect();
+        // TODO set initial menu selected lang based on app lang
+        Help {
+            first_render: true, 
+            locale, 
+            all_locales, 
+            lang_name, 
+            switch_mode: false,
+            langs: Menu::new(names),
+        }
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
@@ -47,24 +60,47 @@ impl Help {
         match code {
             KeyCode::Char('b') | KeyCode::Char('B') => return (ScreenType::Home, self.locale.clone()),
             KeyCode::Char('c') | KeyCode::Char('C') => self.handle_lang_switch(),
+            KeyCode::Enter => self.handle_enter(),
+            KeyCode::Up => {
+                if self.switch_mode {
+                    self.langs.previous();
+                }
+            },
+            KeyCode::Down => {
+                if self.switch_mode {
+                    self.langs.next();
+                }
+            },
+            KeyCode::Esc => {
+                if self.switch_mode {
+                    self.switch_mode = false;
+                    let loc_idx = self.get_locale_idx();
+                    self.langs.state.select(loc_idx);
+                }
+            }
             _ => {}
         } 
         (ScreenType::Help, self.locale.clone())
     }
 
     fn handle_lang_switch(&mut self) {
-        let (code, name) = self.get_new_lang();
-        self.locale = code;
-        self.lang_name = name;
+        if self.switch_mode {
+            return;
+        }
+
+        self.switch_mode = true;
     }
 
-    fn get_new_lang(&self) -> (String, String) {
-        // TODO update logic to use available langs and menu selection
-        match self.locale.as_str() {
-            "en" => (String::from("pl"), String::from("Polski")),
-            "pl" => (String::from("en"), String::from("English")),
-            _ => (String::from("en"), String::from("English")),
+    fn handle_enter(&mut self) {
+        if !self.switch_mode {
+            return;
         }
+
+        let idx = self.langs.state.selected().unwrap();
+        let (code, name) = self.all_locales[idx].clone();
+        self.locale = code;
+        self.lang_name = name;
+        self.switch_mode = false;
     }
 
     fn render_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
@@ -91,7 +127,8 @@ impl Help {
     }
 
     fn render_content<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let content_area = layout::get_default_column(area);
+        let content_area = layout::get_column_with_margin(area, 40, 120);
+        let layout = layout::get_header_body_layout(content_area, 5);
         let selected_lang_text = vec![
             Spans::from(Span::raw("")),
             Spans::from(vec![
@@ -101,7 +138,30 @@ impl Help {
             Spans::from(Span::raw("")),
         ];
         let selected_lang = layout::get_par_with_colors(selected_lang_text, Color::White, Color::Black);
-        f.render_widget(selected_lang, content_area);
+        f.render_widget(selected_lang, layout[0]);
+
+       self.render_switch_area(f, layout[1]);
+    }
+
+    fn render_switch_area<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
+        if !self.switch_mode {
+            f.render_widget(Clear, area);
+        } else {
+            let lang_list = layout::create_navigable_list(self.langs.items.clone());
+            
+            f.render_stateful_widget(lang_list, area, &mut self.langs.state);
+        }
+    }
+
+    fn get_locale_idx(&self) -> Option<usize> {
+        let mut idx = 0;
+        for locale in self.all_locales.iter() {
+            if locale.0 == self.locale {
+                return Some(idx);
+            }
+            idx += 1;
+        }
+        return None;
     }
 }
 
