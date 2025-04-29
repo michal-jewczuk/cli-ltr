@@ -19,6 +19,9 @@ title.rerun:
 title.results:
   en: Display results
   pl: Wyświetl wyniki
+title.help:
+  en: Help
+  pl: Pomoc
 
 # PAGE CONTENTS
 home.instruction.l1:
@@ -39,6 +42,9 @@ runner.note.l2:
 results.for:
   en: "Results for:"
   pl: "Wyniki dla: "
+help.selected:
+  en: "Selected language: "
+  pl: "Wybrany język: "
 
 # MENU ITEMS
 menu.tests:
@@ -79,4 +85,7 @@ navigation.previous:
 navigation.start:
   en: Start
   pl: Rozpocznij
+navigation.language:
+  en: Switch language
+  pl: Zmień język
 

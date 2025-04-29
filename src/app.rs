@@ -38,6 +38,11 @@ impl App<'_> {
         let tests_finished = testservice::get_results_list();
         // TODO get that from config not to start with en always
         let default_locale = String::from("en");
+        // TODO should this be from config as well?
+        let all_locales = vec![
+            (String::from("en"), String::from("English")), 
+            (String::from("pl"), String::from("Polski")), 
+        ];
         App { 
             is_finished: false,
             locale: default_locale.clone(),
@@ -46,7 +51,7 @@ impl App<'_> {
             tests: test::Tests::new(tests_to_do, default_locale.clone()),
             results: results::Results::new(None, default_locale.clone()),
             rerun: rerun::Rerun::new(tests_finished, default_locale.clone()),
-            help: help::Help::new(),
+            help: help::Help::new(default_locale.clone(), all_locales),
             runner: runner::Runner::new(None, default_locale.clone()),
         }
     }
@@ -131,13 +136,15 @@ impl App<'_> {
                     _ => self.current_screen = screen
                 }
             },
-            // TODO remove this poc once config is in place 
             ScreenType::Help => {
-                match self.locale.as_str() {
-                    "pl" => self.update_locale(String::from("en")),
-                    _ => self.update_locale(String::from("pl")),
-                };
-                self.current_screen = self.help.handle_key_code(code)
+                let (screen, locale) = self.help.handle_key_code(code);
+                match screen {
+                    ScreenType::Home => {
+                        self.update_locale(locale);
+                        self.current_screen = screen
+                    },
+                    _ => self.current_screen = screen
+                }
             },
             _ => {}
         }
@@ -151,6 +158,7 @@ impl App<'_> {
         self.results.locale = self.locale.clone();
         self.rerun.locale = self.locale.clone();
         self.runner.locale = self.locale.clone();
+        self.help.locale = self.locale.clone();
     }
 }
 
