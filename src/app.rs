@@ -9,7 +9,7 @@ use tui::{
 };
 use crossterm::event::{Event, KeyCode, KeyEvent};
 
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum ScreenType {
     Home,
     Tests,
@@ -107,6 +107,7 @@ impl App<'_> {
                     ScreenType::Runner => {
                         let test_model = testservice::get_by_id(test_id);
                         self.runner = runner::Runner::new(test_model, self.locale.clone());
+                        self.runner.origin = ScreenType::Tests;
                         self.current_screen = ScreenType::Runner;
                     },
                     ScreenType::Home => self.current_screen = ScreenType::Home,
@@ -120,6 +121,7 @@ impl App<'_> {
                     ScreenType::Runner => {
                         let test_model = testservice::get_by_id(test_id);
                         self.runner = runner::Runner::new(test_model, self.locale.clone());
+                        self.runner.origin = ScreenType::Rerun;
                         self.current_screen = ScreenType::Runner;
                     },
                     ScreenType::Home => self.current_screen = ScreenType::Home,

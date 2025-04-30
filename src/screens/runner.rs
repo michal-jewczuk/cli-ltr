@@ -18,6 +18,7 @@ use rust_i18n::t;
 pub struct Runner<'a> {
     pub first_render: bool,
     pub locale: String,
+    pub origin: ScreenType,
     item: Option<TestModel<'a>>,
     current_q_number: usize,
     current_q_text: &'a str,
@@ -47,6 +48,7 @@ impl<'a> Runner<'a> {
              show_summary: false,
              timer_t: Instant::now(),
              timer_q: Instant::now(),
+             origin: ScreenType::Tests,
          }
     }
 
@@ -92,7 +94,7 @@ impl<'a> Runner<'a> {
                 if self.is_running() {
                     return (ScreenType::Runner, None)
                 }
-                return (ScreenType::Tests, None);
+                return (self.origin.clone(), None);
             }
             // a safeguard
             // should have a confirmation dialog
