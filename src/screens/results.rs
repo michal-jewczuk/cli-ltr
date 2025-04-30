@@ -207,7 +207,7 @@ impl Results {
 
         let content_area = layout::get_column_with_margin(layout[1], 20, 150);
         if self.current_q_idx == self.count_q {
-            let summary = layout::render_summary_table(self.item.clone().unwrap().answers);
+            let summary = layout::render_summary_table(self.item.clone().unwrap().answers, &self.locale);
             f.render_widget(summary, content_area);
         } else {
             let mut aidx: usize = 0;
@@ -228,7 +228,8 @@ impl Results {
                 })
                 .collect::<Vec<Spans>>();
 
-            let answers_page = layout::get_results_q_page(self.current_q_idx + 1, self.count_q, q.question, answers_spans, q.time);
+            let answers_page = layout::get_results_q_page(self.current_q_idx + 1, 
+                self.count_q, q.question, answers_spans, q.time, &self.locale);
             f.render_widget(answers_page, content_area);
         }
     }

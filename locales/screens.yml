@@ -45,6 +45,39 @@ results.for:
 help.selected:
   en: "Selected language: "
   pl: "Wybrany język: "
+question.text:
+  en: QUESTION
+  pl: PYTANIE
+question.outof:
+  en: out of
+  pl: z
+question.time.q:
+  en: Question time elapsed
+  pl: Czas pytania
+question.time.t:
+  en: Test time elapsed
+  pl: Czas testu
+question.answered.in:
+  en: Answered in
+  pl: Odpowiedź w czasie
+summary.header.number:
+  en: " Number"
+  pl: " Numer"
+summary.header.question:
+  en: " Question"
+  pl: " Pytanie"
+summary.header.time:
+  en: " Time"
+  pl: " Czas"
+summary.header.correct:
+  en: " Correct"
+  pl: " Poprawnie"
+summary.yes:
+  en: Yes
+  pl: Tak
+summary.no:
+  en: No
+  pl: Nie
 
 # MENU ITEMS
 menu.tests:

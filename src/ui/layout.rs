@@ -6,6 +6,7 @@ use tui::{
     text::{Span, Spans},
     widgets::{Block, Borders, Cell, List, ListItem, Paragraph, Row, Table, Wrap},
 };
+use rust_i18n::t;
 
 
 pub fn get_adaptative_column(f: Rect) -> Rect {
@@ -159,10 +160,14 @@ fn get_navbar_element(text: String, primary: bool) -> Span<'static> {
     }
 }
 
-pub fn get_question_area<'a>(q_text: &'a str, qidx: usize, total: usize, q_time: u64, t_time: u64) -> Paragraph<'a> {
-    let header = format!("QUESTION {} out of {}", qidx, total);
-    let q_timer = format!("Question time elapsed: {}", format_time(q_time));
-    let t_timer = format!("Test time elapsed: {}", format_time(t_time));
+pub fn get_question_area<'a>(q_text: &'a str, qidx: usize, total: usize, q_time: u64, t_time: u64, locale: &str) -> Paragraph<'a> {
+    let header = format!("{} {} {} {}", 
+        t!("question.text", locale = locale), 
+        qidx, 
+        t!("question.outof", locale = locale), 
+        total);
+    let q_timer = format!("{}: {}", t!("question.time.q", locale = locale), format_time(q_time));
+    let t_timer = format!("{}: {}", t!("question.time.t", locale = locale), format_time(t_time));
     let txt = vec![
         Spans::from(Span::raw("")),
         Spans::from(Span::styled(header, Style::default().add_modifier(Modifier::BOLD))),
@@ -184,24 +189,24 @@ pub fn get_question_area<'a>(q_text: &'a str, qidx: usize, total: usize, q_time:
         .wrap(Wrap { trim: true })
 }
 
-pub fn render_summary_table<'a>(answers: Vec<AnswerModel>) -> Table<'a> {
+pub fn render_summary_table<'a>(answers: Vec<AnswerModel>, locale: &str) -> Table<'a> {
     let mut idx = 0;
     let font_color = Color::White;
     let rows: Vec<Row> = answers.iter()
         .map(|a| {
-            let mut correct = "No";
+            let mut correct = "summary.no";
             if a.is_correct {
-                correct = "Yes"
+                correct = "summary.yes"; 
             }
             idx += 1;
-            (format!(" #{:?}", idx), a.question.to_string(), correct.to_string(), format_time(a.time))
+            (format!(" #{:?}", idx), a.question.to_string(), correct, format_time(a.time))
         })
         .map(|t| {
 	    let mut color = Color::Red;
-	    if t.2 == "Yes" {
+	    if t.2 == "summary.yes" {
         	color = Color::Green;
 	    }
-	    let result = Spans::from(vec![Span::raw(" "), Span::raw(t.2)]);
+	    let result = Spans::from(vec![Span::raw(" "), Span::raw(t!(t.2, locale = locale))]);
 	    let timer = Spans::from(vec![Span::raw(" "), Span::raw(t.3)]);
 	    Row::new(vec![
 		Cell::from(t.0).style(Style::default().bg(color).fg(font_color)),
@@ -216,7 +221,12 @@ pub fn render_summary_table<'a>(answers: Vec<AnswerModel>) -> Table<'a> {
     Table::new(rows)
         .style(Style::default())
         .header(
-            Row::new(vec![" Number", " Question", " Time", " Correct"])
+            Row::new(vec![
+               t!("summary.header.number", locale = locale), 
+               t!("summary.header.question", locale = locale), 
+               t!("summary.header.time", locale = locale), 
+               t!("summary.header.correct", locale = locale), 
+            ])
             .style(Style::default()
                 .add_modifier(Modifier::BOLD)
                 .fg(Color::Black)
@@ -234,9 +244,13 @@ pub fn render_summary_table<'a>(answers: Vec<AnswerModel>) -> Table<'a> {
         .column_spacing(1)
 }
 
-pub fn get_results_q_page(qidx: usize, total: usize, q_text: String, answers: Vec<Spans>, time: u64) -> Paragraph {
-    let header = format!("QUESTION {} out of {}", qidx, total);
-    let timer = format!("Answered in: {}", format_time(time));
+pub fn get_results_q_page<'a>(qidx: usize, total: usize, q_text: String, answers: Vec<Spans<'a>>, time: u64, locale: &'a str) -> Paragraph<'a> {
+    let header = format!("{} {} {} {}", 
+        t!("question.text", locale = locale), 
+        qidx, 
+        t!("question.outof", locale = locale), 
+        total);
+    let timer = format!("{}: {}", t!("question.answered.in", locale = locale), format_time(time));
     let mut txt = vec![
         Spans::from(Span::raw("")),
         Spans::from(Span::styled(header, Style::default().add_modifier(Modifier::BOLD))),

@@ -237,7 +237,7 @@ impl<'a> Runner<'a> {
         let q_time = self.timer_q.elapsed().as_secs();
         let t_time = self.timer_t.elapsed().as_secs();
         let question_l = layout::get_question_area(
-            self.current_q_text, self.current_q_number, self.question_count, q_time, t_time,
+            self.current_q_text, self.current_q_number, self.question_count, q_time, t_time, &self.locale,
             ); 
 
         let q_area = layout::get_column_with_margin(area, 30, 150);
@@ -274,7 +274,7 @@ impl<'a> Runner<'a> {
     }
 
     fn render_summary_body<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let table = layout::render_summary_table(self.result.clone().answers);
+        let table = layout::render_summary_table(self.result.clone().answers, &self.locale);
         let table_area = layout::get_default_column(area);
 
 	f.render_widget(table, table_area);
