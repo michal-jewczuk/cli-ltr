@@ -1,7 +1,58 @@
 use crate::models::test;
+use rusqlite::Connection;
 
 // should be a struct
 // how to solve value borrowing problem?
+
+pub fn init_table() -> Connection {
+    let conn = Connection::open_in_memory().unwrap();
+    let _ = create_schema(&conn);
+    let _ = populate_tests(&conn);
+    conn
+}
+
+fn create_schema(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    conn.execute(
+        "CREATE TABLE exam (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            date TEXT NOT NULL
+        ) STRICT",
+        (),
+    )?;
+
+    Ok(())
+}
+
+fn populate_tests(conn: &Connection) {
+    let data = &[
+        ("English idioms with a twist", "2025-03-07"),
+        ("Verbs and stuff", "2025-02-28"),
+        ("Week exam #2", "2025-02-27"),
+    ];
+
+    data.iter().for_each(|r| {
+        conn.execute(
+            "INSERT INTO exam (name, date)
+            VALUES (?1, ?2)",
+            (r.0, r.1),
+        );
+    });
+}
+
+pub fn get_fresh(conn: &Connection) -> Result<Vec<(String, String)>, rusqlite::Error> {
+    let select = "SELECT id, name FROM exam";
+    let mut stmt = conn.prepare(select)?;
+
+    let rows = stmt.query_map([], |row| Ok((row.get::<_, usize>(0), row.get::<_, String>(1))))?;
+    let mut results = Vec::new();
+    for name_r  in rows {
+        let tmp = name_r.unwrap();
+        results.push((format!("{}", (tmp.0.unwrap())), tmp.1.unwrap()));
+    }
+
+    Ok(results)
+}
 
 pub fn get_to_do<'a>() -> Vec<(String, String)> {
     vec![
@@ -31,7 +82,7 @@ pub fn get_to_do<'a>() -> Vec<(String, String)> {
 pub fn get_by_id<'a>(id: String) -> Option<test::TestModel<'a>> {
     vec![
         test::TestModel {
-            id: "xyz",
+            id: "1",
             title: "[2025-03-07] English idioms with twist",
             questions: vec![
                 test::QuestionModel::new(
@@ -57,7 +108,7 @@ pub fn get_by_id<'a>(id: String) -> Option<test::TestModel<'a>> {
             ],
         },
         test::TestModel {
-            id: "abc",
+            id: "2",
             title: "[2025-02-28] Verbs and stuff",
             questions: vec![
                 test::QuestionModel::new(
@@ -93,7 +144,7 @@ pub fn get_by_id<'a>(id: String) -> Option<test::TestModel<'a>> {
             ],
         },
         test::TestModel {
-            id: "cde",
+            id: "3",
             title: "[2025-02-27] Week exam #2",
             questions: vec![
                 test::QuestionModel::new(

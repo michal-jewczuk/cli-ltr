@@ -9,6 +9,8 @@ use tui::{
 };
 use crossterm::event::{Event, KeyCode, KeyEvent};
 
+use rusqlite::Connection;
+
 #[derive(Clone, PartialEq)]
 pub enum ScreenType {
     Home,
@@ -34,7 +36,10 @@ pub struct App<'a> {
 
 impl App<'_> {
     pub fn new() -> Self {
-	let tests_to_do = testservice::get_to_do();
+        let conn = testservice::init_table();
+        let tests_to_do = testservice::get_fresh(&conn).unwrap();
+
+	//let tests_to_do = testservice::get_to_do();
         let tests_finished = testservice::get_results_list();
         // TODO get that from config not to start with en always
         let default_locale = String::from("en");

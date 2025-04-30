@@ -7,4 +7,8 @@ edition = "2024"
 tui = "0.19"
 crossterm = "0.25"
 rust-i18n = "3.1.4"
+rusqlite = { version = "0.35.0", features = ["bundled"] }
+pretty-sqlite = "0.1.0"
+
+[dev-dependencies]
 
