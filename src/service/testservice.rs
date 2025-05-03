@@ -1,13 +1,11 @@
 use crate::models::test;
 use rusqlite::Connection;
 
-// should be a struct
-// how to solve value borrowing problem?
-
 pub fn init_table() -> Connection {
     let conn = Connection::open_in_memory().unwrap();
     let _ = create_schema(&conn);
     let _ = populate_tests(&conn);
+    let _ = populate_questions(&conn);
     conn
 }
 
@@ -17,6 +15,20 @@ fn create_schema(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
             date TEXT NOT NULL
+        ) STRICT",
+        (),
+    )?;
+
+    conn.execute(
+        "CREATE TABLE question (
+          id INTEGER PRIMARY KEY
+          text TEXT NOT NULL,
+          a1 TEXT NOT NULL,
+          a2 TEXT NOT NULL,
+          a3 TEXT,
+          a4 TEXT,
+          correct NUMBER NOT NULL,
+          FOREIGN KEY(examid) REFERENCES exam(id)
         ) STRICT",
         (),
     )?;
@@ -32,7 +44,7 @@ fn populate_tests(conn: &Connection) {
     ];
 
     data.iter().for_each(|r| {
-        conn.execute(
+        let _ = conn.execute(
             "INSERT INTO exam (name, date)
             VALUES (?1, ?2)",
             (r.0, r.1),
@@ -40,19 +52,82 @@ fn populate_tests(conn: &Connection) {
     });
 }
 
+fn populate_questions(conn: &Connection) {
+    let data = &[
+        ( 
+            "Lets imagine that you see your brother for the first time today and it is 1 pm. How do you greet him?",
+            "Good evening",
+            "Good morning",
+            "Hi, do we know each other?",
+            "Yo bro, shouldn't you be in Buenos Aires right now?",
+            3,
+            1,
+        ),
+        (
+            "This is the ... I am telling you this!",
+            "current time",
+            "previous time",
+            "last time",
+            "any timme",
+            2,
+            1,
+        ),
+    ];
+
+    data.iter().for_each(|r| {
+        let _ = conn.execute(
+            "INSERT INTO question (text, a1, a2, a3, a4, correct, examid)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            (r.0, r.1, r.2, r.3, r.4, r.5, r.6),
+        );
+    });
+}
+
 pub fn get_fresh(conn: &Connection) -> Result<Vec<(String, String)>, rusqlite::Error> {
-    let select = "SELECT id, name FROM exam";
+    let select = "SELECT id, name, date FROM exam";
     let mut stmt = conn.prepare(select)?;
 
-    let rows = stmt.query_map([], |row| Ok((row.get::<_, usize>(0), row.get::<_, String>(1))))?;
-    let mut results = Vec::new();
+    let rows = stmt.query_map([], |row| Ok(
+            (row.get::<_, usize>(0), row.get::<_, String>(1), row.get::<_, String>(2))
+        ))?;
+    let mut results: Vec<(String, String)> = Vec::new();
     for name_r  in rows {
         let tmp = name_r.unwrap();
-        results.push((format!("{}", (tmp.0.unwrap())), tmp.1.unwrap()));
+        let id = tmp.0.map_or(0, |v| v);
+        let date = tmp.2.map_or(String::from(""), |v| v);
+        let name = tmp.1.map_or(String::from("Invalid"), |v| v); 
+        results.push((format!("{}", id), format!("[{}] {}", date, name)));
     }
 
     Ok(results)
 }
+
+struct TestE {
+    id: usize,
+    name: String,
+    date: String,
+}
+
+// TODO get back to it once TestModel is in String
+//pub fn get_q_by_id<'a>(conn: &Connection, id: String) -> Option<test::TestModel<'a>> {
+//   let mut stmt_t = conn.prepare("SELECT id, name, date FROM exam WHERE exam.id = :id");
+//   let tE = stmt_t.expect("PANICKED").query_row([":id", id.as_str()], |row| {Ok(
+//           TestE {
+//               //id: row.get::<_, usize>(0).map_or(0, |v| v),
+//               id: row.get(0)?,
+//               name: row.get(1).map_or(String::from("Ooops"), |v| v),
+//               date: row.get(2).map_or(String::from("0000-00-00"), |v| v),
+//           }
+//   )}).unwrap();
+//
+//   let test = test::TestModel::new(
+//       format!("{}", tE.id).clone().as_str(),
+//       format!("[{}] {}", tE.date, tE.name).clone().as_str(),
+//       vec![]
+//   );
+//
+//   Some(test)
+//}
 
 pub fn get_to_do<'a>() -> Vec<(String, String)> {
     vec![

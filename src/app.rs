@@ -32,6 +32,7 @@ pub struct App<'a> {
     rerun: rerun::Rerun,
     help: help::Help,
     runner: runner::Runner<'a>,
+    conn: Connection,
 }
 
 impl App<'_> {
@@ -58,6 +59,7 @@ impl App<'_> {
             rerun: rerun::Rerun::new(tests_finished, default_locale.clone()),
             help: help::Help::new(default_locale.clone(), all_locales),
             runner: runner::Runner::new(None, default_locale.clone()),
+            conn,
         }
     }
 
@@ -111,6 +113,7 @@ impl App<'_> {
                 match screen {
                     ScreenType::Runner => {
                         let test_model = testservice::get_by_id(test_id);
+                        //let test_model = testservice::get_q_by_id(&self.conn, test_id);
                         self.runner = runner::Runner::new(test_model, self.locale.clone());
                         self.runner.origin = ScreenType::Tests;
                         self.current_screen = ScreenType::Runner;
