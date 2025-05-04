@@ -15,13 +15,13 @@ use tui::{
 use crossterm::event::{KeyCode};
 use rust_i18n::t;
 
-pub struct Runner<'a> {
+pub struct Runner {
     pub first_render: bool,
     pub locale: String,
     pub origin: ScreenType,
-    item: Option<TestModel<'a>>,
+    item: Option<TestModel>,
     current_q_number: usize,
-    current_q_text: &'a str,
+    current_q_text: String,
     current_q_answers: Menu,
     result: ResultModel,
     question_count: usize,
@@ -30,8 +30,8 @@ pub struct Runner<'a> {
     timer_q: Instant,
 }
 
-impl<'a> Runner<'a> {
-    pub fn new(item: Option<TestModel<'a>>, locale: String) -> Self {
+impl Runner {
+    pub fn new(item: Option<TestModel>, locale: String) -> Self {
          let mut question_count = 0; 
          if !item.is_none() {
              question_count = item.clone().unwrap().questions.len();
@@ -41,7 +41,7 @@ impl<'a> Runner<'a> {
              locale: locale,
              item, 
              current_q_number: 0,
-             current_q_text: "",
+             current_q_text: String::from(""),
              current_q_answers: Menu::new(vec![]),
              result: ResultModel::new(String::from(""), String::from(""), vec![], 0),
              question_count, 
@@ -150,9 +150,9 @@ impl<'a> Runner<'a> {
 
         // should here be a None check?
         let tmp_test = self.item.clone().unwrap();
-        self.current_q_text = tmp_test.questions[0].question;
+        self.current_q_text = tmp_test.questions[0].question.clone();
         let answers_list: Vec<String> = tmp_test.questions[0].answers.clone().iter()
-            .map(|&i| String::from(i)).collect();
+            .map(|i| i.clone()).collect();
         self.current_q_answers = Menu::new(answers_list);
 
         (ScreenType::Runner, None)
@@ -162,10 +162,10 @@ impl<'a> Runner<'a> {
         if self.is_running() {
             let q = self.item.clone().unwrap().questions[self.current_q_number - 1].clone();
             let answers = q.answers.iter()
-                .map(|&a| String::from(a))
+                .map(|a| a.clone())
                 .collect::<Vec<String>>();
             let answer = AnswerModel::new(
-                    String::from(self.current_q_text),
+                    self.current_q_text.clone(),
                     answers,
                     q.correct,
                     self.current_q_answers.state.selected(),
@@ -181,9 +181,9 @@ impl<'a> Runner<'a> {
 
             } else {
                 let tmp_test = self.item.clone().unwrap();
-                self.current_q_text = tmp_test.questions[self.current_q_number].question;
+                self.current_q_text = tmp_test.questions[self.current_q_number].question.clone();
                 let answers_list: Vec<String> = tmp_test.questions[self.current_q_number].answers.clone().iter()
-                    .map(|&i| String::from(i)).collect();
+                    .map(|i| i.clone()).collect();
                 self.current_q_answers = Menu::new(answers_list);
                 self.current_q_number += 1;
                 self.timer_q = Instant::now();
@@ -200,7 +200,7 @@ impl<'a> Runner<'a> {
     }
 
     fn render_test_name<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let title = self.item.as_ref().map_or("42", |i| i.title);
+        let title = self.item.as_ref().map_or("42", |i| i.title.as_str());
         let text = vec![
             Spans::from(Span::raw("")),
             Spans::from(vec![
@@ -237,7 +237,7 @@ impl<'a> Runner<'a> {
         let q_time = self.timer_q.elapsed().as_secs();
         let t_time = self.timer_t.elapsed().as_secs();
         let question_l = layout::get_question_area(
-            self.current_q_text, self.current_q_number, self.question_count, q_time, t_time, &self.locale,
+            &self.current_q_text, self.current_q_number, self.question_count, q_time, t_time, &self.locale,
             ); 
 
         let q_area = layout::get_column_with_margin(area, 30, 150);

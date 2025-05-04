@@ -1,36 +1,31 @@
 #[derive(Clone)]
-pub struct TestModel<'a> {
-    pub id: &'a str,
-    pub title: &'a str,
-    pub questions: Vec<QuestionModel<'a>>,
+pub struct TestModel {
+    pub id: String, 
+    pub title: String, 
+    pub questions: Vec<QuestionModel>,
 }
 
-impl<'a> TestModel<'a> {
+impl TestModel {
     pub fn new(
-        id: &'a str,
-        title: &'a str,
-        questions: Vec<QuestionModel<'a>>
+        id: String,
+        title: String,
+        questions: Vec<QuestionModel>
     ) -> Self {
-        TestModel {
-            id: id,
-            title: title,
-            questions: questions,
-        }
+        TestModel { id, title, questions, }
     }
-    
 }
 
 #[derive(Clone)]
-pub struct QuestionModel<'a> {
-    pub question: &'a str,
-    pub answers: Vec<&'a str>,
+pub struct QuestionModel {
+    pub question: String,
+    pub answers: Vec<String>,
     pub correct: u8,
 }
 
-impl<'a> QuestionModel<'a> {
+impl QuestionModel {
     pub fn new(
-        question: &'a str,
-        answers: Vec<&'a str>,
+        question: String,
+        answers: Vec<String>,
         correct: u8,
     ) -> Self {
         QuestionModel {question, answers, correct}

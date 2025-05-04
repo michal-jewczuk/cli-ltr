@@ -22,7 +22,7 @@ pub enum ScreenType {
     Runner,
 }
 
-pub struct App<'a> {
+pub struct App {
     is_finished: bool,
     locale: String,
     current_screen: ScreenType,
@@ -31,11 +31,11 @@ pub struct App<'a> {
     results: results::Results,
     rerun: rerun::Rerun,
     help: help::Help,
-    runner: runner::Runner<'a>,
+    runner: runner::Runner,
     conn: Connection,
 }
 
-impl App<'_> {
+impl App {
     pub fn new() -> Self {
         let conn = testservice::init_table();
         let tests_to_do = testservice::get_fresh(&conn).unwrap();
