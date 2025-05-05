@@ -21,14 +21,14 @@ fn create_schema(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
 
     conn.execute(
         "CREATE TABLE question (
-          id INTEGER PRIMARY KEY
+          id INTEGER PRIMARY KEY,
           text TEXT NOT NULL,
           a1 TEXT NOT NULL,
           a2 TEXT NOT NULL,
           a3 TEXT,
           a4 TEXT,
-          correct NUMBER NOT NULL,
-          FOREIGN KEY(examid) REFERENCES exam(id)
+          correct INTEGER NOT NULL,
+          examid INTEGER REFERENCES exam(id)
         ) STRICT",
         (),
     )?;
@@ -72,6 +72,69 @@ fn populate_questions(conn: &Connection) {
             2,
             1,
         ),
+        (
+            "How would you tell somebody to go and do something?",
+            "Could you just move, please?",
+            "Just do it!",
+            "Move your behind and get the shit done",
+            "Just stay there and let things happen on their own",
+            2,
+            2,
+        ),
+        (
+            "Stop ... at the world through the pink glasses.",
+            "seeing",
+            "looking",
+            "viewing",
+            "he see",
+            1,
+            2,
+        ),
+        (
+            "Why do policemen walk in paris?",
+            "To arrest you twice as fast for hate speech",
+            "Who could possibly know that",
+            "Two is better than one",
+            "One can read and the other can write",
+            3,
+            2,
+        ),
+        (
+            "I wish you ... so dumm.",
+            "is",
+            "weren't",
+            "was not",
+            "were",
+            1,
+            3,
+        ),
+        (
+            "What is the best way to describe the following situation: A woman in her late twentees or early thirties is walking down the street early mornig. Her hair are a mess, her make up is well, like her hair and she is holding her high heels in one hand while covering her face with the other.",
+            "Early morning jogging",
+            "Stroll through the park",
+            "Walk of shame",
+            "My kind of a woman",
+            2,
+            3,
+        ),
+        (
+            "What could be your reaction to learning the correct answer to the previouis question? Pick the one that fits best.",
+            "I should have known that!",
+            "Really? I had no idea!",
+            "So it was not my kind of a woman?",
+            "One of the above",
+            3,
+            3,
+        ),
+        (
+            "What is the proper way to say: '3 + 3' 'is six' or 'are six'?",
+            "is six",
+            "are six",
+            "is nine",
+            "math? oh, come on!",
+            2,
+            3,
+        ),
     ];
 
     data.iter().for_each(|r| {
@@ -83,51 +146,106 @@ fn populate_questions(conn: &Connection) {
     });
 }
 
-pub fn get_fresh(conn: &Connection) -> Result<Vec<(String, String)>, rusqlite::Error> {
-    let select = "SELECT id, name, date FROM exam";
-    let mut stmt = conn.prepare(select)?;
-
-    let rows = stmt.query_map([], |row| Ok(
-            (row.get::<_, usize>(0), row.get::<_, String>(1), row.get::<_, String>(2))
-        ))?;
-    let mut results: Vec<(String, String)> = Vec::new();
-    for name_r  in rows {
-        let tmp = name_r.unwrap();
-        let id = tmp.0.map_or(0, |v| v);
-        let date = tmp.2.map_or(String::from(""), |v| v);
-        let name = tmp.1.map_or(String::from("Invalid"), |v| v); 
-        results.push((format!("{}", id), format!("[{}] {}", date, name)));
-    }
-
-    Ok(results)
-}
-
+#[derive(Debug)]
 struct TestE {
     id: usize,
     name: String,
     date: String,
 }
 
-// TODO get back to it once TestModel is in String
-//pub fn get_q_by_id<'a>(conn: &Connection, id: String) -> Option<test::TestModel<'a>> {
-//   let mut stmt_t = conn.prepare("SELECT id, name, date FROM exam WHERE exam.id = :id");
-//   let tE = stmt_t.expect("PANICKED").query_row([":id", id.as_str()], |row| {Ok(
-//           TestE {
-//               //id: row.get::<_, usize>(0).map_or(0, |v| v),
-//               id: row.get(0)?,
-//               name: row.get(1).map_or(String::from("Ooops"), |v| v),
-//               date: row.get(2).map_or(String::from("0000-00-00"), |v| v),
-//           }
-//   )}).unwrap();
-//
-//   let test = test::TestModel::new(
-//       format!("{}", tE.id).clone().as_str(),
-//       format!("[{}] {}", tE.date, tE.name).clone().as_str(),
-//       vec![]
-//   );
-//
-//   Some(test)
-//}
+impl TestE {
+    fn get_full_name(&self) -> String {
+        format!("[{}] {}", self.date, self.name)
+    }
+
+    fn get_short(&self) -> (String, String) {
+        (format!("{}", self.id), self.get_full_name())
+    }
+
+    fn to_model(&self, questions: Vec<test::QuestionModel>) -> test::TestModel {
+        test::TestModel::new(
+            format!("{}", self.id),
+            self.get_full_name(),
+            questions,
+        )
+    }
+}
+
+#[derive(Debug, Clone)]
+struct QuestionE {
+    id: usize,
+    text: String,
+    a1: String,
+    a2: String,
+    a3: String,
+    a4: String,
+    correct: usize,
+}
+
+impl QuestionE {
+    fn to_model(&self) -> test::QuestionModel {
+        test::QuestionModel::new(
+            self.text.clone(),
+            vec![self.a1.clone(), self.a2.clone(), self.a3.clone(), self.a4.clone()],
+            self.correct as u8,
+        )
+    }
+}
+
+pub fn get_fresh(conn: &Connection) -> Result<Vec<(String, String)>, rusqlite::Error> {
+    let select = "SELECT id, name, date FROM exam";
+    let mut stmt = conn.prepare(select)?;
+
+    let rows = stmt.query_map([], |row| Ok(
+        TestE {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            date: row.get(2)?,
+        }
+    )).unwrap();
+    let mut results: Vec<(String, String)> = Vec::new();
+    for row  in rows {
+        let _ = row.map(|r| results.push(r.get_short()));
+    }
+
+    Ok(results)
+}
+
+pub fn get_q_by_id(conn: &Connection, id: String) -> Option<test::TestModel> {
+    let stmt_t = conn.prepare("SELECT id, name, date FROM exam WHERE exam.id = :id");
+    let row = stmt_t.expect("WHAT").query_row([id.as_str()], |row| Ok(
+        TestE {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            date: row.get(2)?,
+        }
+    ));
+
+    if row.is_err() {
+        return None;
+    }
+
+    // TODO learn why this has to be done that way and how to correct it
+    let stmt_q = conn.prepare("SELECT id, text, a1, a2, a3, a4, correct FROM question WHERE examid = :id");
+    let mut binding = stmt_q.expect("WHAT");
+    let rows = binding.query_map([id.as_str()], |row| {Ok(
+            QuestionE {
+                id: row.get(0)?,
+                text: row.get(1)?,
+                a1: row.get(2)?,
+                a2: row.get(3)?,
+                a3: row.get(4)?,
+                a4: row.get(5)?,
+                correct: row.get(6)?,
+            }
+    )}).unwrap();
+    let mut questions: Vec<test::QuestionModel> = vec![];
+    for row in rows {
+        let _ = row.map(|r| questions.push(r.to_model()));
+    }
+
+    Some(row.unwrap().to_model(questions))
+}
 
 pub fn get_to_do() -> Vec<(String, String)> {
     vec![
@@ -517,6 +635,34 @@ pub fn get_results_by_id(id: String) -> Option<test::ResultModel> {
         .cloned()
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
 
+    // TODO create a setup with in memomy conneciton once moved to file db
 
+    #[test]
+    fn test_query_by_id() {
+        let questions = vec![
+            test::QuestionModel::new(String::from(""), 
+                vec![
+                    String::from(""), 
+                    String::from(""),
+                    String::from(""),
+                    String::from(""),
+                ],
+                2),
+        ];
+        let expected = Some(test::TestModel::new(
+                String::from("1"), 
+                String::from("[2025-03-07] English idioms with a twist"), 
+                questions
+        ));
+        let conn = init_table();
+
+        let result = get_q_by_id(&conn, String::from("1"));
+
+        assert_eq!(result, expected);
+    }
+}
 

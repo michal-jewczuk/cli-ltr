@@ -1,4 +1,4 @@
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TestModel {
     pub id: String, 
     pub title: String, 
@@ -15,7 +15,7 @@ impl TestModel {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct QuestionModel {
     pub question: String,
     pub answers: Vec<String>,

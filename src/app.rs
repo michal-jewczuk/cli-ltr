@@ -112,8 +112,8 @@ impl App {
                 let (screen, test_id) = self.tests.handle_key_code(code);
                 match screen {
                     ScreenType::Runner => {
-                        let test_model = testservice::get_by_id(test_id);
-                        //let test_model = testservice::get_q_by_id(&self.conn, test_id);
+                        //let test_model = testservice::get_by_id(test_id);
+                        let test_model = testservice::get_q_by_id(&self.conn, test_id);
                         self.runner = runner::Runner::new(test_model, self.locale.clone());
                         self.runner.origin = ScreenType::Tests;
                         self.current_screen = ScreenType::Runner;
