@@ -37,10 +37,8 @@ pub struct App {
 
 impl App {
     pub fn new() -> Self {
-        let conn = testservice::init_table();
-        let tests_to_do = testservice::get_fresh(&conn).unwrap();
-
-	//let tests_to_do = testservice::get_to_do();
+        let conn = testservice::init_conn_and_populate();
+        let tests_to_do = testservice::get_to_do(&conn);
         let tests_finished = testservice::get_results_list();
         // TODO get that from config not to start with en always
         let default_locale = String::from("en");
