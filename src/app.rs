@@ -39,7 +39,7 @@ impl App {
     pub fn new() -> Self {
         let conn = testservice::init_conn_and_populate();
         let tests_to_do = testservice::get_to_do(&conn);
-        let tests_finished = testservice::get_results_list();
+        let tests_finished = testservice::get_finished(&conn);
         // TODO get that from config not to start with en always
         let default_locale = String::from("en");
         // TODO should this be from config as well?
@@ -105,12 +105,21 @@ impl App {
 
     fn handle_key_code(&mut self, code: KeyCode) -> Result<(), io::Error> {
         match self.current_screen {
-            ScreenType::Home => self.current_screen = self.home.handle_key_code(code),
+            ScreenType::Home => {
+                let screen = self.home.handle_key_code(code);
+                match screen {
+                    ScreenType::Results => {
+                        self.results.results_items = testservice::get_finished(&self.conn);
+                        self.current_screen = screen;
+                    },
+                    _ => self.current_screen = screen
+
+                }
+            },
             ScreenType::Tests => {
                 let (screen, test_id) = self.tests.handle_key_code(code);
                 match screen {
                     ScreenType::Runner => {
-                        //let test_model = testservice::get_by_id(test_id);
                         let test_model = testservice::get_q_by_id(&self.conn, test_id);
                         self.runner = runner::Runner::new(test_model, self.locale.clone());
                         self.runner.origin = ScreenType::Tests;
@@ -120,12 +129,30 @@ impl App {
                     _ => self.current_screen = screen 
                 }
             },
-            ScreenType::Results => self.current_screen = self.results.handle_key_code(code),
+            ScreenType::Results => {
+                let (screen, test_o) = self.results.handle_key_code(code);
+                match screen {
+                    ScreenType::Results => {
+                        match test_o {
+                            Some(id) => {
+                                let result = testservice::get_results_by_id(id);
+                                self.results = results::Results::new(result, self.locale.clone());
+                                self.results.results_items = testservice::get_finished(&self.conn);
+                            },
+                            None => ()
+                        }
+                        self.current_screen = ScreenType::Results
+                    },
+                    _ => self.current_screen = screen
+                }
+                //self.current_screen = self.results.handle_key_code(code)}
+            },
             ScreenType::Rerun => {
                 let (screen, test_id) = self.rerun.handle_key_code(code);
                 match screen {
                     ScreenType::Runner => {
-                        let test_model = testservice::get_by_id(test_id);
+                        //let test_model = testservice::get_by_id(test_id);
+                        let test_model = testservice::get_q_by_id(&self.conn, test_id);
                         self.runner = runner::Runner::new(test_model, self.locale.clone());
                         self.runner.origin = ScreenType::Rerun;
                         self.current_screen = ScreenType::Runner;
@@ -139,6 +166,7 @@ impl App {
                 match screen {
                     ScreenType::Results => {
                         self.results = results::Results::new(result.clone(), self.locale.clone());
+                        self.results.results_items = testservice::get_finished(&self.conn);
                         self.current_screen = ScreenType::Results
                     },
                     _ => self.current_screen = screen

@@ -24,6 +24,13 @@ pub fn get_to_do(conn: &Connection) -> Vec<(String, String)> {
     }
 }
 
+pub fn get_finished(conn: &Connection) -> Vec<(String, String)> {
+    match dbservice::get_by_status(conn, "FINISHED") {
+        Ok(rows) => rows,
+        _ => vec![]
+    }
+}
+
 pub fn get_q_by_id(conn: &Connection, id: String) -> Option<test::TestModel> {
     dbservice::get_q_by_id(conn, id)
 }
@@ -259,7 +266,7 @@ pub fn get_results_list() -> Vec<(String, String)> {
 pub fn get_results_by_id(id: String) -> Option<test::ResultModel> {
     vec![
         test::ResultModel::new(
-            String::from("r_1"), String::from("[2025-01-03] Week exam #1"),
+            String::from("4"), String::from("[2025-01-03] Week exam #1"),
             vec![
                 test::AnswerModel::new(
                     String::from("Are you in the right class?"),
@@ -278,7 +285,7 @@ pub fn get_results_by_id(id: String) -> Option<test::ResultModel> {
             56,
         ),
         test::ResultModel::new(
-            String::from("r_2"), String::from("[2025-01-03] Adjectives"),
+            String::from("5"), String::from("[2025-01-03] Adjectives"),
             vec![
                 test::AnswerModel::new(
                     String::from("Less is more. True or false?"),
@@ -323,7 +330,7 @@ pub fn get_results_by_id(id: String) -> Option<test::ResultModel> {
             247,
         ),
         test::ResultModel::new(
-            String::from("r_3"), String::from("[2025-01-08] Reading between the lines"),
+            String::from("6"), String::from("[2025-01-08] Reading between the lines"),
             vec![
                 test::AnswerModel::new(
                     String::from("A deep dive into something means"),
@@ -355,7 +362,7 @@ pub fn get_results_by_id(id: String) -> Option<test::ResultModel> {
             21,
         ),
         test::ResultModel::new(
-            String::from("r_4"), String::from("[2025-01-12] Nouns or nuns"),
+            String::from("7"), String::from("[2025-01-12] Nouns or nuns"),
             vec![
                 test::AnswerModel::new(
                     String::from("What is a truck?"),

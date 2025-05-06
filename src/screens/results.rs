@@ -17,20 +17,19 @@ use rust_i18n::t;
 pub struct Results {
     pub first_render: bool,
     pub locale: String,
+    pub results_items: Vec<(String, String)>,
+    results_list: Menu,
     item: Option<ResultModel>,
     show_details: bool,
     current_q_idx: usize,
     current_q: Option<AnswerModel>,
     count_q: usize,
-    results_items: Vec<(String, String)>,
-    results_list: Menu,
 }
 
 impl Results {
     pub fn new(item: Option<ResultModel>, locale: String) -> Self {
         let mut show_details = true;
         let mut count_q = 0;
-        let results_items = testservice::get_results_list();
         match item {
             None => show_details = false,
             Some(ref r) => count_q = r.answers.len(),
@@ -43,7 +42,7 @@ impl Results {
             current_q_idx: 0,
             current_q: None,
             count_q,
-            results_items,
+            results_items: vec![],
             results_list: Menu::new(vec![]),
         }
     }
@@ -73,38 +72,39 @@ impl Results {
         }
     }
 
-    pub fn handle_key_code(&mut self, code: KeyCode) -> ScreenType {
+    pub fn handle_key_code(&mut self, code: KeyCode) -> (ScreenType, Option<String>) {
         match code {
             KeyCode::Char('b') | KeyCode::Char('B') => {
                 if self.show_details {
                     self.show_details = false;
-                    return ScreenType::Results;
+                    return (ScreenType::Results, None);
                 }
-                return ScreenType::Home;
+                return (ScreenType::Home, None);
             },
             KeyCode::Right => self.handle_next(),
             KeyCode::Left => self.handle_previous(),
             KeyCode::Up => self.results_list.previous(),
             KeyCode::Down => self.results_list.next(),
-            KeyCode::Enter => self.handle_enter(),
+            KeyCode::Enter => return self.handle_enter(),
             _ => {}
         } 
-        ScreenType::Results
+        (ScreenType::Results, None)
     }
 
-    fn handle_enter(&mut self) {
+    fn handle_enter(&mut self) -> (ScreenType, Option<String>) {
         if self.show_details {
-            return;
+            return (ScreenType::Results, None);
         }
 
         match self.results_list.state.selected() {
             Some(idx) => {
-                self.item = testservice::get_results_by_id(self.results_items[idx].0.clone());
-                if self.item.is_some() {
-                    self.handle_start();
-                }
+                (ScreenType::Results, Some(self.results_items[idx].0.clone()))
+                //self.item = testservice::get_results_by_id(self.results_items[idx].0.clone());
+                //if self.item.is_some() {
+                //    self.handle_start();
+                //}
             },
-            None => ()
+            None => (ScreenType::Results, None) 
         }
     }
 

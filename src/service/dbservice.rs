@@ -48,8 +48,27 @@ impl QuestionE {
     }
 }
 
+pub fn get_by_status(conn: &Connection, status: &str) -> Result<Vec<(String, String)>, rusqlite::Error> {
+    let select = "SELECT id, name, date FROM exam WHERE status = :status";
+    let mut stmt = conn.prepare(select)?;
+
+    let rows = stmt.query_map([status], |row| Ok(
+        TestE {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            date: row.get(2)?,
+        }
+    )).unwrap();
+    let mut results: Vec<(String, String)> = Vec::new();
+    for row  in rows {
+        let _ = row.map(|r| results.push(r.get_short()));
+    }
+
+    Ok(results)
+}
+
 pub fn get_fresh(conn: &Connection) -> Result<Vec<(String, String)>, rusqlite::Error> {
-    let select = "SELECT id, name, date FROM exam";
+    let select = "SELECT id, name, date FROM exam WHERE status = 'NOT_STARTED'";
     let mut stmt = conn.prepare(select)?;
 
     let rows = stmt.query_map([], |row| Ok(
@@ -108,7 +127,8 @@ pub fn create_schema(conn: &Connection) -> Result<(), Box<dyn std::error::Error>
         "CREATE TABLE IF NOT EXISTS exam (
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
-            date TEXT NOT NULL
+            date TEXT NOT NULL,
+            status TEXT NOT NULL
         ) STRICT",
         (),
     )?;
@@ -132,16 +152,20 @@ pub fn create_schema(conn: &Connection) -> Result<(), Box<dyn std::error::Error>
 
 pub fn populate_tests(conn: &Connection) {
     let data = &[
-        ("English idioms with a twist", "2025-03-07"),
-        ("Verbs and stuff", "2025-02-28"),
-        ("Week exam #2", "2025-02-27"),
+        ("English idioms with a twist", "2025-03-07", "NOT_STARTED"),
+        ("Verbs and stuff", "2025-02-28", "NOT_STARTED"),
+        ("Week exam #2", "2025-02-27", "NOT_STARTED"),
+        ("Week exam #1", "2025-01-03", "FINISHED"),
+        ("Adjectives", "2025-01-03", "FINISHED"),
+        ("Reading between the lines", "2025-01-08", "FINISHED"),
+        ("Nouns or nuns", "2025-01-12", "FINISHED"),
     ];
 
     data.iter().for_each(|r| {
         let _ = conn.execute(
-            "INSERT INTO exam (name, date)
-            VALUES (?1, ?2)",
-            (r.0, r.1),
+            "INSERT INTO exam (name, date, status)
+            VALUES (?1, ?2, ?3)",
+            (r.0, r.1, r.2),
         );
     });
 }
