@@ -86,7 +86,7 @@ pub fn get_fresh(conn: &Connection) -> Result<Vec<(String, String)>, rusqlite::E
     Ok(results)
 }
 
-pub fn get_q_by_id(conn: &Connection, id: String) -> Option<test::TestModel> {
+pub fn get_test_by_id(conn: &Connection, id: String) -> Option<test::TestModel> {
     let stmt_t = conn.prepare("SELECT id, name, date FROM exam WHERE exam.id = :id");
     let row = stmt_t.expect("WHAT").query_row([id.as_str()], |row| Ok(
         TestE {
@@ -253,6 +253,78 @@ pub fn populate_questions(conn: &Connection) {
             "math? oh, come on!",
             2,
             3,
+        ),
+        (
+           "Are you in the right class?",
+            "Yes",
+            "No",
+            "I have no idea",
+            "Maybe",
+            0,
+            4,
+        ),
+        (
+            "Less is more. True or false?",
+            "True",
+            "False",
+            "I have no idea",
+            "It depends",
+            3,
+            5,
+        ),
+        (
+            "The grass is always ... on the other side",
+            "bigger",
+            "greener",
+            "bushier",
+            "green",
+            1,
+            5,
+        ),
+        (
+            "If he is younger than me then I am ... than him",
+            "as young as",
+            "younger",
+            "old",
+            "older",
+            3,
+            5,
+        ),
+        (
+            "A deep dive into something means",
+            "to swim underwater really deep",
+            "to jump into water from a high place",
+            "to focus someones attention on one topic in order to understand it very well",
+            "all of the above",
+            2,
+            6,
+        ),
+        (
+            "Which number cannot be represented by the phrase: 'two four two zero'",
+            "2440",
+            "4420",
+            "4400",
+            "2420",
+            0,
+            6,
+        ),
+        (
+            "What is a truck?",
+            "a car but not a car, a bigger car",
+            "lower part of the tree",
+            "a main branch in git repository",
+            "a vihickle",
+            0,
+            7,
+        ),
+        (
+            "Swims on water and donald is the name",
+            "dack",
+            "dak",
+            "duck",
+            "chicken",
+            2,
+            7,
         ),
     ];
 
