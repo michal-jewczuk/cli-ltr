@@ -1,7 +1,6 @@
 use crate::app::ScreenType;
-use crate::ui::{layout, menu::Menu, navbar, navbar::NavType};
+use crate::ui::{layout, navbar, navbar::NavType};
 use crate::models::test::{AnswerModel, ResultModel};
-use crate::service::testservice;
 
 use tui::{
     backend::Backend,
@@ -17,10 +16,7 @@ use rust_i18n::t;
 pub struct Results {
     pub first_render: bool,
     pub locale: String,
-    pub results_items: Vec<(String, String)>,
-    results_list: Menu,
     item: Option<ResultModel>,
-    show_details: bool,
     current_q_idx: usize,
     current_q: Option<AnswerModel>,
     count_q: usize,
@@ -28,32 +24,24 @@ pub struct Results {
 
 impl Results {
     pub fn new(item: Option<ResultModel>, locale: String) -> Self {
-        let mut show_details = true;
-        let mut count_q = 0;
-        match item {
-            None => show_details = false,
-            Some(ref r) => count_q = r.answers.len(),
-        }
+        let count_q = match item {
+            Some(ref r) => r.answers.len(),
+            None => 0,
+        };
         Results {
             first_render: true,
             locale,
             item,
-            show_details,
             current_q_idx: 0,
             current_q: None,
             count_q,
-            results_items: vec![],
-            results_list: Menu::new(vec![]),
         }
     }
 
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
         if self.first_render {
-            if self.show_details {
-                self.handle_start();
-            }
+            self.handle_start();
 
-            self.results_list = Menu::new(self.results_items.clone().into_iter().map(|t| t.1).collect());
             self.first_render = false;
             f.render_widget(Clear, f.size());
             return;
@@ -62,64 +50,29 @@ impl Results {
         let background = layout::get_background();
         f.render_widget(background, f.size());
 
-        if self.show_details {
-            let layout = layout::get_header_body_layout(f.size(), 3);
+        let layout = layout::get_header_body_layout(f.size(), 3);
 
-            self.render_details_header(f, layout[0]);
-            self.render_details_body(f, layout[1]);
-        } else {
-            self.render_list(f);
-        }
+        self.render_details_header(f, layout[0]);
+        self.render_details_body(f, layout[1]);
     }
 
-    pub fn handle_key_code(&mut self, code: KeyCode) -> (ScreenType, Option<String>) {
+    pub fn handle_key_code(&mut self, code: KeyCode) -> ScreenType  {
         match code {
-            KeyCode::Char('b') | KeyCode::Char('B') => {
-                if self.show_details {
-                    self.show_details = false;
-                    return (ScreenType::Results, None);
-                }
-                return (ScreenType::Home, None);
-            },
+            KeyCode::Char('b') | KeyCode::Char('B') => return ScreenType::Rerun,
             KeyCode::Right => self.handle_next(),
             KeyCode::Left => self.handle_previous(),
-            KeyCode::Up => self.results_list.previous(),
-            KeyCode::Down => self.results_list.next(),
-            KeyCode::Enter => return self.handle_enter(),
             _ => {}
         } 
-        (ScreenType::Results, None)
-    }
-
-    fn handle_enter(&mut self) -> (ScreenType, Option<String>) {
-        if self.show_details {
-            return (ScreenType::Results, None);
-        }
-
-        match self.results_list.state.selected() {
-            Some(idx) => {
-                (ScreenType::Results, Some(self.results_items[idx].0.clone()))
-                //self.item = testservice::get_results_by_id(self.results_items[idx].0.clone());
-                //if self.item.is_some() {
-                //    self.handle_start();
-                //}
-            },
-            None => (ScreenType::Results, None) 
-        }
+        ScreenType::Results
     }
 
     fn handle_start(&mut self) {
         self.current_q_idx = 0;
         self.current_q = Some(self.item.clone().unwrap().answers[0].clone());
         self.count_q = self.item.as_ref().unwrap().answers.len();
-        self.show_details = true;
     }
 
     fn handle_next(&mut self) {
-        if !self.show_details {
-            return;
-        }
-
         self.current_q_idx += 1;
         if self.current_q_idx > self.count_q {
             self.current_q_idx = self.count_q;
@@ -130,55 +83,12 @@ impl Results {
     }
 
     fn handle_previous(&mut self) {
-        if !self.show_details {
-            return;
-        }
-
         if self.current_q_idx == 0 {
             self.current_q_idx = 0; 
         } else {
             self.current_q_idx -= 1;
         }
         self.current_q = Some(self.item.clone().unwrap().answers[self.current_q_idx].clone());
-    }
-
-    fn render_list<B: Backend>(&mut self, f: &mut Frame<B>) {
-        let layout = layout::get_header_navbar_layout(f.size(), 3, 3);
-
-        self.render_list_header(f, layout[0]);
-        self.render_list_navbar(f, layout[1]);
-        self.render_list_content(f, layout[2]);
-    }
-
-    fn render_list_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let text = vec![
-            Spans::from(Span::raw("")),
-            Spans::from(vec![
-                Span::styled(t!("name.short", locale = &self.locale), Style::default().add_modifier(Modifier::BOLD)),
-                Span::raw(" - "),
-                Span::raw(t!("title.results", locale = &self.locale))
-            ]),
-        ];
-
-        let header = layout::get_header(text);
-        let header_area = layout::get_default_column(area);
-    
-        f.render_widget(header, header_area);
-    }
-
-    fn render_list_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let navbar_e = navbar::get_elements(vec![NavType::Back, NavType::Quit], self.locale.clone());
-        let navbar = layout::get_navbar(navbar_e);
-        let navbar_area = layout::get_default_column(area);
-
-        f.render_widget(navbar, navbar_area);
-    }
-
-    fn render_list_content<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let content = layout::create_navigable_list(self.results_list.items.clone());
-        let content_area = layout::get_adaptative_column(area);
-
-        f.render_stateful_widget(content, content_area, &mut self.results_list.state);
     }
 
     fn render_details_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {

@@ -47,17 +47,25 @@ impl Rerun {
     pub fn handle_key_code(&mut self, code: KeyCode) -> (ScreenType, String) {
         match code {
             KeyCode::Char('b') | KeyCode::Char('B') => return (ScreenType::Home, String::from("")),
+            KeyCode::Char('r') | KeyCode::Char('R') => return self.handle_rerun(),
             KeyCode::Up => self.list.previous(),
             KeyCode::Down => self.list.next(),
-            KeyCode::Enter => return self.handle_enter(),
+            KeyCode::Enter => return self.handle_show_results(),
             _ => {}
         } 
         (ScreenType::Rerun, String::from(""))
     }
 
-    fn handle_enter(&mut self) -> (ScreenType, String) {
+    fn handle_rerun(&mut self) -> (ScreenType, String) {
         match self.list.state.selected() {
             Some(idx) => (ScreenType::Runner, self.items[idx].0.to_string()),
+            None => (ScreenType::Rerun, String::from(""))
+        }
+    }
+
+    fn handle_show_results(&mut self) -> (ScreenType, String) {
+        match self.list.state.selected() {
+            Some(idx) => (ScreenType::Results, self.items[idx].0.to_string()),
             None => (ScreenType::Rerun, String::from(""))
         }
     }
@@ -78,7 +86,9 @@ impl Rerun {
     }
 
     fn render_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let navbar_e = navbar::get_elements(vec![NavType::Back, NavType::Quit], self.locale.clone());
+        let navbar_e = navbar::get_elements(vec![
+            NavType::Results, NavType::Rerun, NavType::Back, NavType::Quit
+        ], self.locale.clone());
         let navbar = layout::get_navbar(navbar_e);
         let navbar_area = layout::get_default_column(area);
 

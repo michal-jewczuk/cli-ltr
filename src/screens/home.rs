@@ -47,8 +47,7 @@ impl Home {
             KeyCode::Down => self.menu.next(),
             KeyCode::Enter => return self.handle_enter(),
             KeyCode::Char('t') | KeyCode::Char('T') => return ScreenType::Tests,
-            KeyCode::Char('r') | KeyCode::Char('R') => return ScreenType::Results,
-            KeyCode::Char('d') | KeyCode::Char('D') => return ScreenType::Rerun,
+            KeyCode::Char('r') | KeyCode::Char('R') => return ScreenType::Rerun,
             KeyCode::Char('h') | KeyCode::Char('H') => return ScreenType::Help,
             _ => {} 
         }
@@ -59,8 +58,7 @@ impl Home {
         self.locale = locale;
         let menu_items = vec![
             format!("[t] {}", t!("menu.tests", locale = &self.locale)),
-            format!("[r] {}", t!("menu.results", locale = &self.locale)),
-            format!("[d] {}", t!("menu.redo", locale = &self.locale)),
+            format!("[r] {}", t!("menu.redo", locale = &self.locale)),
             format!("[h] {}", t!("menu.help", locale = &self.locale)),
             format!("[q] {}", t!("menu.exit", locale = &self.locale)),
         ];
@@ -72,10 +70,9 @@ impl Home {
             Some(screen) => {
                 match screen {
                     0 => ScreenType::Tests,
-                    1 => ScreenType::Results,
-                    2 => ScreenType::Rerun,
-                    3 => ScreenType::Help,
-                    4 => ScreenType::Quit,
+                    1 => ScreenType::Rerun,
+                    2 => ScreenType::Help,
+                    3 => ScreenType::Quit,
                     _ => ScreenType::Home
                 }
             },

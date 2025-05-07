@@ -14,8 +14,8 @@ title.tests:
   en: New tests
   pl: Nowe testy
 title.rerun:
-  en: Rerun finished tests
-  pl: Przetestuj jeszcze raz
+  en: Show results / rerun finished tests
+  pl: Wyświetl wyniki / Przetestuj jeszcze raz
 title.results:
   en: Display results
   pl: Wyświetl wyniki
@@ -87,8 +87,8 @@ menu.results:
   en: Results
   pl: Wyniki
 menu.redo:
-  en: Redo
-  pl: Powtórki
+  en: Results/Redo
+  pl: Wyniki/Powtórki
 menu.help:
   en: Help
   pl: Pomoc
@@ -118,6 +118,12 @@ navigation.previous:
 navigation.start:
   en: Start
   pl: Rozpocznij
+navigation.rerun:
+  en: Rerun
+  pl: Powtórz
+navigation.results:
+  en: Results
+  pl: Wyniki
 navigation.language:
   en: Switch language
   pl: Zmień język

@@ -118,7 +118,7 @@ pub fn get_navbar(text: Vec<(String, String)>) -> Paragraph<'static> {
     text.into_iter().for_each(|t| {
         nb.push(get_navbar_element(t.0, true));
         nb.push(get_navbar_element(t.1, false));
-        nb.push(Span::styled("__", Style::default().fg(Color::Blue).add_modifier(Modifier::BOLD)));
+        nb.push(Span::raw("  "));
     });
     nb.pop();
     nb.push(Span::styled(".", Style::default().fg(Color::Blue)));
