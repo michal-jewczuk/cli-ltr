@@ -25,11 +25,19 @@ impl TestE {
             questions,
         )
     }
+
+    fn to_result(&self, answers: Vec<test::AnswerModel>, total_time: u64) -> test::ResultModel {
+        test::ResultModel::new(
+            format!("{}", self.id),
+            self.get_full_name(),
+            answers,
+            total_time,
+        )
+    }
 }
 
 #[derive(Debug, Clone)]
 struct QuestionE {
-    id: usize,
     text: String,
     a1: String,
     a2: String,
@@ -48,30 +56,40 @@ impl QuestionE {
     }
 }
 
+#[derive(Debug, Clone)]
+struct AnswerE {
+    given: usize,
+    time: usize,
+    text: String,
+    a1: String,
+    a2: String,
+    a3: String,
+    a4: String,
+    correct: usize,
+}
+
+impl AnswerE {
+    fn to_model(&self) -> test::AnswerModel {
+        let mut g = Some(self.given);
+        if self.given == 42 {
+            g = None;
+        }
+        test::AnswerModel::new(
+            self.text.clone(),
+            vec![self.a1.clone(), self.a2.clone(), self.a3.clone(), self.a4.clone()],
+            self.correct as u8,
+            g,
+            self.given == self.correct,
+            self.time as u64,
+        )
+    }
+}
+
 pub fn get_by_status(conn: &Connection, status: &str) -> Result<Vec<(String, String)>, rusqlite::Error> {
     let select = "SELECT id, name, date FROM exam WHERE status = :status";
     let mut stmt = conn.prepare(select)?;
 
     let rows = stmt.query_map([status], |row| Ok(
-        TestE {
-            id: row.get(0)?,
-            name: row.get(1)?,
-            date: row.get(2)?,
-        }
-    )).unwrap();
-    let mut results: Vec<(String, String)> = Vec::new();
-    for row  in rows {
-        let _ = row.map(|r| results.push(r.get_short()));
-    }
-
-    Ok(results)
-}
-
-pub fn get_fresh(conn: &Connection) -> Result<Vec<(String, String)>, rusqlite::Error> {
-    let select = "SELECT id, name, date FROM exam WHERE status = 'NOT_STARTED'";
-    let mut stmt = conn.prepare(select)?;
-
-    let rows = stmt.query_map([], |row| Ok(
         TestE {
             id: row.get(0)?,
             name: row.get(1)?,
@@ -101,17 +119,16 @@ pub fn get_test_by_id(conn: &Connection, id: String) -> Option<test::TestModel> 
     }
 
     // TODO learn why this has to be done that way and how to correct it
-    let stmt_q = conn.prepare("SELECT id, text, a1, a2, a3, a4, correct FROM question WHERE examid = :id ORDER BY number ASC");
+    let stmt_q = conn.prepare("SELECT text, a1, a2, a3, a4, correct FROM question WHERE examid = :id ORDER BY number ASC");
     let mut binding = stmt_q.expect("WHAT");
     let rows = binding.query_map([id.as_str()], |row| {Ok(
             QuestionE {
-                id: row.get(0)?,
-                text: row.get(1)?,
-                a1: row.get(2)?,
-                a2: row.get(3)?,
-                a3: row.get(4)?,
-                a4: row.get(5)?,
-                correct: row.get(6)?,
+                text: row.get(0)?,
+                a1: row.get(1)?,
+                a2: row.get(2)?,
+                a3: row.get(3)?,
+                a4: row.get(4)?,
+                correct: row.get(5)?,
             }
     )}).unwrap();
     let mut questions: Vec<test::QuestionModel> = vec![];
@@ -120,6 +137,45 @@ pub fn get_test_by_id(conn: &Connection, id: String) -> Option<test::TestModel> 
     }
 
     Some(row.unwrap().to_model(questions))
+}
+
+pub fn get_result_by_id(conn: &Connection, id: String) -> Option<test::ResultModel> {
+    let stmt_t = conn.prepare("SELECT id, name, date FROM exam WHERE exam.id = :id");
+    let row = stmt_t.expect("WHAT").query_row([id.as_str()], |row| Ok(
+        TestE {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            date: row.get(2)?,
+        }
+    ));
+
+    if row.is_err() {
+        return None;
+    }
+
+    let stmt_q = conn.prepare("SELECT result.given, result.time, question.text, question.a1, question.a2, question.a3, question.a4, question.correct 
+        FROM result JOIN question ON result.qnumber = question.number WHERE question.examid = :id AND
+        result.date = (SELECT MAX(date) FROM result GROUP BY examid HAVING examid = :id)");
+    let mut binding = stmt_q.expect("WHAT");
+    let rows = binding.query_map([id.as_str()], |row| {Ok(
+            AnswerE {
+                given: row.get(0)?,
+                time: row.get(1)?,
+                text: row.get(2)?,
+                a1: row.get(3)?,
+                a2: row.get(4)?,
+                a3: row.get(5)?,
+                a4: row.get(6)?,
+                correct: row.get(7)?,
+            }
+    )}).unwrap();
+    let mut answers: Vec<test::AnswerModel> = vec![];
+    for row in rows {
+        let _ = row.map(|r| answers.push(r.to_model()));
+    }
+    let total_time: u64 = answers.iter().map(|a| a.time).sum();
+
+    Some(row.unwrap().to_result(answers, total_time))
 }
 
 pub fn create_schema(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
@@ -144,6 +200,18 @@ pub fn create_schema(conn: &Connection) -> Result<(), Box<dyn std::error::Error>
           a4 TEXT,
           correct INTEGER NOT NULL,
           examid INTEGER REFERENCES exam(id)
+        ) STRICT",
+        (),
+    )?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS result (
+            id INTEGER PRIMARY KEY,
+            examid INTEGER REFERENCES exam(id),
+            qnumber INTEGER,
+            given INTEGER,
+            time INTEGER,
+            date INTEGER
         ) STRICT",
         (),
     )?;
@@ -216,7 +284,7 @@ pub fn populate_questions(conn: &Connection) {
         ),
         (
             3,
-            "Why do policemen walk in paris?",
+            "Why do policemen walk in pairs?",
             "To arrest you twice as fast for hate speech",
             "Who could possibly know that",
             "Two is better than one",
@@ -351,6 +419,27 @@ pub fn populate_questions(conn: &Connection) {
             "INSERT INTO question (number, text, a1, a2, a3, a4, correct, examid)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
             (r.0, r.1, r.2, r.3, r.4, r.5, r.6, r.7),
+        );
+    });
+}
+
+pub fn populate_answers(conn: &Connection) {
+    let data = vec![
+        (4, 1, 1, 56, 10001),
+        (5, 1, 2, 66, 10011),
+        (5, 2, 1, 120, 10011),
+        (5, 3, 2, 61, 10011),
+        (6, 1, 2, 9, 10101),
+        (6, 2, 0, 12, 10101),
+        (7, 1, 3, 100, 11001),
+        (7, 2, 0, 23, 11001),
+    ];
+
+    data.iter().for_each(|r| {
+        let _ = conn.execute(
+            "INSERT INTO result (examid, qnumber, given, time, date) 
+            VALUES (?1, ?2, ?3, ?4, ?5)",
+            (r.0, r.1, r.2, r.3, r.4),
         );
     });
 }

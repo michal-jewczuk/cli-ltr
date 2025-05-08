@@ -140,7 +140,7 @@ pub fn get_test_start_row(text: Vec<(String, String)>) -> Paragraph<'static> {
     text.into_iter().for_each(|t| {
         start.push(get_navbar_element(t.0, invert));
         start.push(get_navbar_element(t.1, !invert));
-        start.push(Span::styled("__", Style::default().fg(Color::Blue).add_modifier(Modifier::BOLD)));
+        start.push(Span::raw("  "));
         invert = true;
     });
     start.pop();

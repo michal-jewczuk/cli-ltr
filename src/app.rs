@@ -131,7 +131,7 @@ impl App {
                     },
                     ScreenType::Home => self.current_screen = ScreenType::Home,
                     ScreenType::Results => {
-                        let result = testservice::get_results_by_id(test_id);
+                        let result = testservice::get_result_by_id(&self.conn, test_id);
                         self.results = results::Results::new(result, self.locale.clone());
                         self.current_screen = ScreenType::Results;
                     },
