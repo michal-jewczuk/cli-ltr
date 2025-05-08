@@ -101,7 +101,7 @@ pub fn get_test_by_id(conn: &Connection, id: String) -> Option<test::TestModel> 
     }
 
     // TODO learn why this has to be done that way and how to correct it
-    let stmt_q = conn.prepare("SELECT id, text, a1, a2, a3, a4, correct FROM question WHERE examid = :id");
+    let stmt_q = conn.prepare("SELECT id, text, a1, a2, a3, a4, correct FROM question WHERE examid = :id ORDER BY number ASC");
     let mut binding = stmt_q.expect("WHAT");
     let rows = binding.query_map([id.as_str()], |row| {Ok(
             QuestionE {
@@ -136,6 +136,7 @@ pub fn create_schema(conn: &Connection) -> Result<(), Box<dyn std::error::Error>
     conn.execute(
         "CREATE TABLE IF NOT EXISTS question (
           id INTEGER PRIMARY KEY,
+          number INTEGER,
           text TEXT NOT NULL,
           a1 TEXT NOT NULL,
           a2 TEXT NOT NULL,
@@ -174,6 +175,7 @@ pub fn populate_tests(conn: &Connection) {
 pub fn populate_questions(conn: &Connection) {
     let data = &[
         ( 
+            1,
             "Lets imagine that you see your brother for the first time today and it is 1 pm. How do you greet him?",
             "Good evening",
             "Good morning",
@@ -183,6 +185,7 @@ pub fn populate_questions(conn: &Connection) {
             1,
         ),
         (
+            2,
             "This is the ... I am telling you this!",
             "current time",
             "previous time",
@@ -192,6 +195,7 @@ pub fn populate_questions(conn: &Connection) {
             1,
         ),
         (
+            1,
             "How would you tell somebody to go and do something?",
             "Could you just move, please?",
             "Just do it!",
@@ -201,6 +205,7 @@ pub fn populate_questions(conn: &Connection) {
             2,
         ),
         (
+            2,
             "Stop ... at the world through the pink glasses.",
             "seeing",
             "looking",
@@ -210,6 +215,7 @@ pub fn populate_questions(conn: &Connection) {
             2,
         ),
         (
+            3,
             "Why do policemen walk in paris?",
             "To arrest you twice as fast for hate speech",
             "Who could possibly know that",
@@ -219,6 +225,7 @@ pub fn populate_questions(conn: &Connection) {
             2,
         ),
         (
+            1,
             "I wish you ... so dumm.",
             "is",
             "weren't",
@@ -228,6 +235,7 @@ pub fn populate_questions(conn: &Connection) {
             3,
         ),
         (
+            2,
             "What is the best way to describe the following situation: A woman in her late twentees or early thirties is walking down the street early mornig. Her hair are a mess, her make up is well, like her hair and she is holding her high heels in one hand while covering her face with the other.",
             "Early morning jogging",
             "Stroll through the park",
@@ -237,6 +245,7 @@ pub fn populate_questions(conn: &Connection) {
             3,
         ),
         (
+            3,
             "What could be your reaction to learning the correct answer to the previouis question? Pick the one that fits best.",
             "I should have known that!",
             "Really? I had no idea!",
@@ -246,6 +255,7 @@ pub fn populate_questions(conn: &Connection) {
             3,
         ),
         (
+            4,
             "What is the proper way to say: '3 + 3' 'is six' or 'are six'?",
             "is six",
             "are six",
@@ -255,6 +265,7 @@ pub fn populate_questions(conn: &Connection) {
             3,
         ),
         (
+            1,
            "Are you in the right class?",
             "Yes",
             "No",
@@ -264,6 +275,7 @@ pub fn populate_questions(conn: &Connection) {
             4,
         ),
         (
+            1,
             "Less is more. True or false?",
             "True",
             "False",
@@ -273,6 +285,7 @@ pub fn populate_questions(conn: &Connection) {
             5,
         ),
         (
+            2,
             "The grass is always ... on the other side",
             "bigger",
             "greener",
@@ -282,6 +295,7 @@ pub fn populate_questions(conn: &Connection) {
             5,
         ),
         (
+            3,
             "If he is younger than me then I am ... than him",
             "as young as",
             "younger",
@@ -291,6 +305,7 @@ pub fn populate_questions(conn: &Connection) {
             5,
         ),
         (
+            1,
             "A deep dive into something means",
             "to swim underwater really deep",
             "to jump into water from a high place",
@@ -300,6 +315,7 @@ pub fn populate_questions(conn: &Connection) {
             6,
         ),
         (
+            2,
             "Which number cannot be represented by the phrase: 'two four two zero'",
             "2440",
             "4420",
@@ -309,6 +325,7 @@ pub fn populate_questions(conn: &Connection) {
             6,
         ),
         (
+            1,
             "What is a truck?",
             "a car but not a car, a bigger car",
             "lower part of the tree",
@@ -318,6 +335,7 @@ pub fn populate_questions(conn: &Connection) {
             7,
         ),
         (
+            2,
             "Swims on water and donald is the name",
             "dack",
             "dak",
@@ -330,9 +348,9 @@ pub fn populate_questions(conn: &Connection) {
 
     data.iter().for_each(|r| {
         let _ = conn.execute(
-            "INSERT INTO question (text, a1, a2, a3, a4, correct, examid)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-            (r.0, r.1, r.2, r.3, r.4, r.5, r.6),
+            "INSERT INTO question (number, text, a1, a2, a3, a4, correct, examid)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+            (r.0, r.1, r.2, r.3, r.4, r.5, r.6, r.7),
         );
     });
 }
