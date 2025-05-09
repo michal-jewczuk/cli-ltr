@@ -27,6 +27,15 @@ impl Rerun {
          Rerun{ first_render: true, locale: locale, items: items, list: Menu::new(names) }
     }
 
+    pub fn update_items(&mut self, items: Vec<(String, String)>) {
+        let names: Vec<String> = items.iter()
+            .map(|t| t.1.clone())
+            .collect();
+
+        self.items = items;
+        self.list = Menu::new(names);
+    }
+
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) {
         if self.first_render {
             self.first_render = false;

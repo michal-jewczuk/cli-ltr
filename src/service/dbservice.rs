@@ -1,5 +1,6 @@
 use crate::models::test;
 use rusqlite::Connection;
+use std::time::{Duration, SystemTime};
 
 
 #[derive(Debug)]
@@ -176,6 +177,30 @@ pub fn get_result_by_id(conn: &Connection, id: String) -> Option<test::ResultMod
     let total_time: u64 = answers.iter().map(|a| a.time).sum();
 
     Some(row.unwrap().to_result(answers, total_time))
+}
+
+pub fn update_status(conn: &Connection, id: String, status: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let stmt = conn.prepare("UPDATE exam SET status = :status WHERE id = :id");
+    let _ = stmt?.execute([status, id.as_str()])?;
+    Ok(())
+}
+
+pub fn save_result(conn: &Connection, result: test::ResultModel) -> Result<(), Box<dyn std::error::Error>> {
+    let mut date = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap_or(Duration::ZERO).as_secs();
+    let mut idx = 0;
+    result.answers.iter()
+        .map(|a| {
+            idx += 1;
+            (&result.id, idx, a.given.unwrap_or(42), a.time, date)
+        })
+        .for_each(|r| {
+            let _ = conn.execute(
+                "INSERT INTO result (examid, qnumber, given, time, date) 
+                VALUES (?1, ?2, ?3, ?4, ?5)",
+                (r.0, r.1, r.2, r.3, r.4),
+            );
+        });
+    Ok(())
 }
 
 pub fn create_schema(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {

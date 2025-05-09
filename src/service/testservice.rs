@@ -40,6 +40,19 @@ pub fn get_result_by_id(conn: &Connection, id: String) -> Option<test::ResultMod
     dbservice::get_result_by_id(conn, id)
 }
 
+pub fn set_finished(conn: &Connection, id: String) {
+    match dbservice::update_status(conn, id, "FINISHED") {
+        _ => () 
+    }
+}
+
+pub fn save_result(conn: &Connection, result: test::ResultModel) {
+    match dbservice::save_result(conn, result) {
+        _ => () 
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;

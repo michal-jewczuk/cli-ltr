@@ -123,13 +123,13 @@ impl App {
             ScreenType::Rerun => {
                 let (screen, test_id) = self.rerun.handle_key_code(code);
                 match screen {
+                    ScreenType::Home => self.current_screen = ScreenType::Home,
                     ScreenType::Runner => {
                         let test_model = testservice::get_test_by_id(&self.conn, test_id);
                         self.runner = runner::Runner::new(test_model, self.locale.clone());
                         self.runner.origin = ScreenType::Rerun;
                         self.current_screen = ScreenType::Runner;
                     },
-                    ScreenType::Home => self.current_screen = ScreenType::Home,
                     ScreenType::Results => {
                         let result = testservice::get_result_by_id(&self.conn, test_id);
                         self.results = results::Results::new(result, self.locale.clone());
@@ -139,7 +139,21 @@ impl App {
                 }
             },
             ScreenType::Runner => {
+                // TODO handle case when test is finished but option 'back' was chosen instead of
+                // 'details'
                 let (screen, result) = self.runner.handle_key_code(code);
+                match result.clone() {
+                    Some(r) => {
+                        let id = r.id.clone();
+                        testservice::set_finished(&self.conn, id);
+                        let to_do = testservice::get_to_do(&self.conn);
+                        let finished = testservice::get_finished(&self.conn);
+                        self.tests.update_items(to_do);
+                        self.rerun.update_items(finished);
+                        testservice::save_result(&self.conn, r);
+                    }
+                    None => (),
+                }
                 match screen {
                     ScreenType::Results => {
                         self.results = results::Results::new(result.clone(), self.locale.clone());

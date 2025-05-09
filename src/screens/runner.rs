@@ -94,6 +94,10 @@ impl Runner {
                 if self.is_running() {
                     return (ScreenType::Runner, None)
                 }
+                if self.show_summary {
+                    self.show_summary = false;
+                    return (self.origin.clone(), Some(self.result.clone()));
+                }
                 return (self.origin.clone(), None);
             }
             // a safeguard
