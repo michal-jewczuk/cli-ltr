@@ -9,6 +9,8 @@ crossterm = "0.25"
 rust-i18n = "3.1.4"
 rusqlite = { version = "0.35.0", features = ["bundled"] }
 pretty-sqlite = "0.1.0"
+serde = { version = "^1.0", features = ["derive"] }
+confy = "0.6.1"
 
 [dev-dependencies]
 

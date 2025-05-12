@@ -19,9 +19,9 @@ pub struct Home {
 }
 
 impl Home {
-    pub fn new() -> Self {
-        let mut home = Home { first_render: true, menu: Menu::new(vec![]), locale: String::from("")};
-        home.update_locale(String::from("en"));
+    pub fn new(locale: String) -> Self {
+        let mut home = Home { first_render: true, menu: Menu::new(vec![]), locale: String::from("") };
+        home.update_locale(locale);
         home
     }
 

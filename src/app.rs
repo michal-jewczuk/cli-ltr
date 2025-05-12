@@ -1,6 +1,6 @@
 
 use crate::screens::{help, home, rerun, results, runner, test};
-use crate::service::testservice;
+use crate::service::{testservice, configservice};
 
 use std::io;
 use tui::{
@@ -41,7 +41,8 @@ impl App {
         let tests_to_do = testservice::get_to_do(&conn);
         let tests_finished = testservice::get_finished(&conn);
         // TODO get that from config not to start with en always
-        let default_locale = String::from("en");
+        //let default_locale = String::from("en");
+        let default_locale = configservice::get_locale();
         // TODO should this be from config as well?
         let all_locales = vec![
             (String::from("en"), String::from("English")), 
@@ -51,7 +52,7 @@ impl App {
             is_finished: false,
             locale: default_locale.clone(),
             current_screen: ScreenType::Home,
-            home: home::Home::new(),
+            home: home::Home::new(default_locale.clone()),
             tests: test::Tests::new(tests_to_do, default_locale.clone()),
             results: results::Results::new(None, default_locale.clone()),
             rerun: rerun::Rerun::new(tests_finished, default_locale.clone()),
@@ -185,6 +186,7 @@ impl App {
         self.rerun.locale = self.locale.clone();
         self.runner.locale = self.locale.clone();
         self.help.locale = self.locale.clone();
+        configservice::save_locale(self.locale.clone());
     }
 }
 
