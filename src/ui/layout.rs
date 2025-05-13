@@ -94,6 +94,10 @@ pub fn get_par_with_colors(text: Vec<Spans>, fg: Color, bg: Color) -> Paragraph 
         .wrap(Wrap { trim: true })
 }
 
+pub fn get_par_default(text: Vec<Spans>) -> Paragraph {
+    get_par_with_colors(text, Color::White, Color::Black)
+}
+
 pub fn get_par_with_borders(text: Vec<Spans>) -> Paragraph {
     Paragraph::new(text)
         .block(Block::default().borders(Borders::TOP | Borders::BOTTOM))

@@ -186,7 +186,7 @@ pub fn update_status(conn: &Connection, id: String, status: &str) -> Result<(), 
 }
 
 pub fn save_result(conn: &Connection, result: test::ResultModel) -> Result<(), Box<dyn std::error::Error>> {
-    let mut date = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap_or(Duration::ZERO).as_secs();
+    let date = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap_or(Duration::ZERO).as_secs();
     let mut idx = 0;
     result.answers.iter()
         .map(|a| {

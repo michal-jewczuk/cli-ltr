@@ -50,7 +50,11 @@ impl Tests {
 
         self.render_header(f, layout[0]);
         self.render_navbar(f, layout[1]);
-        self.render_test_items(f, layout[2]);
+        if self.items.len() == 0 {
+            self.render_empty_items(f, layout[2]);
+        } else {
+            self.render_test_items(f, layout[2]);
+        }
     }
 
     pub fn handle_key_code(&mut self, code: KeyCode) -> (ScreenType, String) {
@@ -99,6 +103,22 @@ impl Tests {
         let list_area = layout::get_adaptative_column(area);
 
         f.render_stateful_widget(list, list_area, &mut self.list.state);
+    }
+
+    fn render_empty_items<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
+        let text = vec![
+            Spans::from(Span::raw("")),
+            Spans::from(vec![
+                Span::styled(t!("test.empty.header", locale = &self.locale), Style::default().add_modifier(Modifier::BOLD)),
+            ]),
+            Spans::from(Span::raw("")),
+            Spans::from(Span::styled(t!("test.empty.info", locale = &self.locale), Style::default().add_modifier(Modifier::ITALIC))),
+            Spans::from(Span::raw("")),
+        ];
+        let empty = layout::get_par_default(text);
+        let empty_area = layout::get_default_column(area);
+
+        f.render_widget(empty, empty_area);
     }
 }
 

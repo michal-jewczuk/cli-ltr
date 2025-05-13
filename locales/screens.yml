@@ -30,6 +30,18 @@ home.instruction.l1:
 home.instruction.l2:
   en: or you can use the specified key shortcut to instantly confirm
   pl: albo możesz wcisnąć dedykowany skrót klawiszowy by wybrać bezpośrednio
+test.empty.header:
+  en: No new tests to run
+  pl: Brak nowych testów do uruchomienia
+test.empty.info:
+  en: Move to <Help> to import some tests or try reruning the finished ones.
+  pl: Przejdź do <Pomocy> by zaimportować testy albo uruchom jeszcze raz któryś z zakończonych.
+rerun.empty.header:
+  en: No finished tests
+  pl: Brak ukończonych testów
+rerun.empty.info:
+  en: Move to <Tests> to finish some first.
+  pl: Przejdź do <Testów> by wcześniej jakieś rozwiązać.
 runner.start:
   en: Do you want to start the test?
   pl: Chcesz rozpocząć test?
