@@ -3,16 +3,39 @@ use crate::models::test;
 use std::io;
 use std::fs::{self, DirEntry};
 use std::path::{Path, PathBuf};
+use rust_i18n::t;
 
-pub fn import_test_files() {
+pub fn import_test_files(locale: &str) {
+    let mut logs: Vec<String> = vec![];
     let files = read_test_files();
+    files.iter()
+        .map(|f| format!("{}: {:?}", t!("import.parsing", locale = locale), f.file_name().unwrap()))
+        .for_each(|l| logs.push(l));
+
     let tests = files.iter()
         .map(|f| read_file_content(f))
         .collect::<Vec<test::TestModel>>();
-    tests.iter().for_each(|t| println!("{:#?}", t));
+
+    let mut idx = 0;
+    for test in &tests {
+        if validate_structure(&test) {
+            logs.push(format!("{}: {:?}", t!("import.valid", locale = locale), files[idx].file_name().unwrap()))
+        } else {
+            logs.push(format!("{}: {:?}", t!("import.invalid", locale = locale), files[idx].file_name().unwrap()))
+        }
+        idx += 1;
+    }
+
+    tests.iter()
+        .filter(|t| validate_structure(t))
+        .map(|t| save_to_db(t, locale))
+        .for_each(|l| logs.push(l));
+    
+    // move valid and invalid to the same directory?
     files.into_iter().for_each(|f| move_to_finished(f, false));
 
-    println!("Import finished!")
+    logs.push(format!("{}", t!("import.finished", locale = locale)));
+    logs.iter().for_each(|l| println!("{}", l));
 }
 
 pub fn read_test_files() -> Vec<PathBuf> {
@@ -40,7 +63,7 @@ fn move_to_finished(path: PathBuf, remove: bool) {
     let mut moved = PathBuf::new();
     moved.push(r"./finished");
     moved.push(path.file_name().unwrap());
-    println!("Moving file to: {:?}", moved.clone());
+    //println!("Moving file to: {:?}", moved.clone());
     let _ = fs::copy(&path, moved);
     if remove {
         let _ = fs::remove_file(path);
@@ -48,9 +71,6 @@ fn move_to_finished(path: PathBuf, remove: bool) {
 }
 
 fn read_file_content(path: &PathBuf) -> test::TestModel {
-    // have a method that checks file structure
-    // title, a least 1 question
-    // each question with 4 answers and only one answer with a + as correct
     let message: String = fs::read_to_string(path).unwrap();
     let split_t_q: Vec<&str> = message.split("====").collect();
     let questions = &split_t_q[1..].iter()
@@ -63,7 +83,7 @@ fn read_file_content(path: &PathBuf) -> test::TestModel {
 fn parse_question(unparsed: &str) -> test::QuestionModel {
     let splits: Vec<&str> = unparsed.split("----").collect();
     let mut idx = 0;
-    let mut correct = 0;
+    let mut correct = 10;
     let mut answers = vec![];
     splits[1].split("\n")
         .filter(|l| l.len() > 0)
@@ -77,3 +97,23 @@ fn parse_question(unparsed: &str) -> test::QuestionModel {
 
     test::QuestionModel::new(splits[0].trim().to_string(), answers, correct.try_into().unwrap())
 }
+
+fn validate_structure(model: &test::TestModel) -> bool {
+    if model.title.len() < 2 || model.questions.len() < 2 {
+        return false;
+    }
+
+    for question in &model.questions {
+        if question.question.len() < 2 || question.correct == 10 || question.answers.len() != 4 {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+fn save_to_db(model: &test::TestModel, locale: &str) -> String {
+    // TODO implement
+    format!("{}: {:?}",t!("import.save", locale = locale),  model.title)
+}
+

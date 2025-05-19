@@ -1,4 +1,4 @@
-_version: 2
+_version: 3
 name.full:
   en: Command Line Language Test Runner
   pl: Językowy Tester Uruchamiany W Konsoli
@@ -139,4 +139,25 @@ navigation.results:
 navigation.language:
   en: Switch language
   pl: Zmień język
+
+# IMPORT
+import.parsing:
+  en: Parsing file
+  pl: Przetwarzam plik
+import.valid:
+  en: Valid test structure for file
+  pl: Poprawna struktura testu dla pliku
+import.invalid:
+  en: Invalid test structure for file
+  pl: Niepoprawna struktura testu dla pliku
+import.save:
+  en: Saved to db
+  pl: Zapisano w bazie danych
+import.finished:
+  en: Import finished
+  pl: Zakończono ładowanie
+import.none:
+  en: No files to import
+  pl: Brak plików do załadowania
+
 
