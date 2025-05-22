@@ -5,7 +5,7 @@ use std::fs::{self, DirEntry};
 use std::path::{Path, PathBuf};
 use rust_i18n::t;
 
-pub fn import_test_files(locale: &str) {
+pub fn import_test_files(locale: &str) -> Vec<String> {
     let mut logs: Vec<String> = vec![];
     let files = read_test_files();
     files.iter()
@@ -35,7 +35,9 @@ pub fn import_test_files(locale: &str) {
     files.into_iter().for_each(|f| move_to_finished(f, false));
 
     logs.push(format!("{}", t!("import.finished", locale = locale)));
-    logs.iter().for_each(|l| println!("{}", l));
+    logs.iter()
+        .map(|l| l.to_string())
+        .collect::<Vec<String>>()
 }
 
 pub fn read_test_files() -> Vec<PathBuf> {

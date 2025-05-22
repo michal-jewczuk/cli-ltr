@@ -56,7 +56,8 @@ impl App {
             tests: test::Tests::new(tests_to_do, default_locale.clone()),
             results: results::Results::new(None, default_locale.clone()),
             rerun: rerun::Rerun::new(tests_finished, default_locale.clone()),
-            help: help::Help::new(default_locale.clone(), all_locales),
+            //help: help::Help::new(default_locale.clone(), all_locales),
+            help: help::Help::new(String::from("en"), all_locales),
             runner: runner::Runner::new(None, default_locale.clone()),
             conn,
         }

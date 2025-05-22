@@ -1,4 +1,4 @@
-_version: 3
+_version: 2
 name.full:
   en: Command Line Language Test Runner
   pl: Językowy Tester Uruchamiany W Konsoli
@@ -49,7 +49,7 @@ runner.note.l1:
   en: "Please note: "
   pl: "Zwróć uwagę: "
 runner.note.l2:
-  en: once started, the test must be finished!
+  en: "once started, the test must be finished!"
   pl: test musi być ukończony po rozpoczęciu!
 results.for:
   en: "Results for:"
@@ -139,8 +139,14 @@ navigation.results:
 navigation.language:
   en: Switch language
   pl: Zmień język
+navigation.import:
+  en: Import
+  pl: Importowanie
 
 # IMPORT
+import.welcome:
+  en: "Place some test files in 'import' directory and press 's' to start the import process or 'ESC' to close this screen"
+  pl: "Wrzuć testy do folderu 'import' i wciśnij 's' by rozpocząć process importu albo klawisz 'ESC' by zamknąć ten ekran"
 import.parsing:
   en: Parsing file
   pl: Przetwarzam plik
@@ -159,5 +165,4 @@ import.finished:
 import.none:
   en: No files to import
   pl: Brak plików do załadowania
-
 

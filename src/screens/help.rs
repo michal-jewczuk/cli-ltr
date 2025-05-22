@@ -1,5 +1,6 @@
 use crate::app::ScreenType;
 use crate::ui::{layout, menu::Menu, navbar, navbar::NavType};
+use crate::service::ioservice;
 
 use tui::{
     backend::Backend,
@@ -19,6 +20,8 @@ pub struct Help {
     lang_name: String,
     switch_mode: bool,
     langs: Menu,
+    import_mode: u8,
+    import_results: Vec<String>,
 }
 
 impl Help {
@@ -29,6 +32,7 @@ impl Help {
             .map(|t| t.1.clone())
             .collect();
         // TODO set initial menu selected lang based on app lang
+        // TODO have one mode that controlls display
         Help {
             first_render: true, 
             locale, 
@@ -36,6 +40,8 @@ impl Help {
             lang_name, 
             switch_mode: false,
             langs: Menu::new(names),
+            import_mode: 0,
+            import_results: vec![],
         }
     }
 
@@ -60,6 +66,8 @@ impl Help {
         match code {
             KeyCode::Char('b') | KeyCode::Char('B') => return (ScreenType::Home, self.locale.clone()),
             KeyCode::Char('c') | KeyCode::Char('C') => self.handle_lang_switch(),
+            KeyCode::Char('i') | KeyCode::Char('I') => self.handle_import_switch(),
+            KeyCode::Char('s') | KeyCode::Char('S') => self.handle_import(),
             KeyCode::Enter => self.handle_enter(),
             KeyCode::Up => {
                 if self.switch_mode {
@@ -77,6 +85,10 @@ impl Help {
                     let loc_idx = self.get_locale_idx();
                     self.langs.state.select(loc_idx);
                 }
+
+                if self.import_mode == 1 || self.import_mode == 3 {
+                    self.import_mode = 0;
+                }
             }
             _ => {}
         } 
@@ -84,11 +96,31 @@ impl Help {
     }
 
     fn handle_lang_switch(&mut self) {
-        if self.switch_mode {
+        if self.switch_mode || self.import_mode == 1 || self.import_mode == 2  {
             return;
         }
 
         self.switch_mode = true;
+        self.import_mode = 0;
+    }
+
+    fn handle_import_switch(&mut self) {
+        if self.import_mode == 0 {
+            self.import_mode = 1;
+        } else if self.import_mode == 1 || self.import_mode == 3 {
+            self.import_mode = 0;
+        }
+    }
+
+    fn handle_import(&mut self) {
+        if self.import_mode != 1 {
+            return;
+        }
+
+        // TODO call in separate thread to see loading screen
+        self.import_mode = 2;
+        self.import_results = ioservice::import_test_files(&self.locale);
+        self.import_mode = 3;
     }
 
     fn handle_enter(&mut self) {
@@ -119,7 +151,9 @@ impl Help {
     }
 
     fn render_navbar<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        let navbar_e = navbar::get_elements(vec![NavType::Language, NavType::Back, NavType::Quit], self.locale.clone());
+        let navbar_e = navbar::get_elements(
+            vec![NavType::Language, NavType::Import, NavType::Back, NavType::Quit], 
+            self.locale.clone());
         let navbar = layout::get_navbar(navbar_e);
         let navbar_area = layout::get_default_column(area);
 
@@ -140,7 +174,44 @@ impl Help {
         let selected_lang = layout::get_par_with_colors(selected_lang_text, Color::White, Color::Black);
         f.render_widget(selected_lang, layout[0]);
 
-       self.render_switch_area(f, layout[1]);
+        if self.import_mode != 0 {
+            self.render_import_area(f, layout[1]);
+        } else {
+            self.render_switch_area(f, layout[1]);
+        }
+    }
+
+    fn render_import_area<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
+        if self.import_mode == 1 {
+            let import_start_text = vec![
+                Spans::from(Span::raw("---------")),
+                Spans::from(Span::raw("")),
+                Spans::from(vec![
+                    Span::raw(t!("import.welcome", locale = &self.locale)),
+                ]),
+                Spans::from(Span::raw("")),
+            ];
+            let import_start = layout::get_par_with_colors(import_start_text, Color::White, Color::Black);
+
+            f.render_widget(import_start, area);
+        } else if self.import_mode == 3 {
+            let mut import_finish_text = vec![
+                Spans::from(Span::raw("---------")),
+                Spans::from(Span::raw("")),
+            ];
+            self.import_results.iter()
+                .map(|r| Spans::from(Span::styled(r, Style::default().add_modifier(Modifier::ITALIC))))
+                .for_each(|l| import_finish_text.push(l));
+
+            let import_finish = layout::get_par_with_colors(import_finish_text, Color::White, Color::Black);
+
+            f.render_widget(import_finish, area);
+        } else if self.import_mode == 2 {
+            let loading_text = vec![Spans::from(Span::raw("importing..."))];
+            let loading = layout::get_par_with_colors(loading_text, Color::White, Color::Black);
+
+            f.render_widget(loading, area);
+        }
     }
 
     fn render_switch_area<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {

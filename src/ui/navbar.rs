@@ -11,6 +11,7 @@ pub enum NavType {
     Language,
     Rerun,
     Results,
+    Import,
 }
 
 pub fn get_elements(items: Vec<NavType>, locale: String) -> Vec<(String, String)> {
@@ -35,6 +36,7 @@ fn get_text(nav: &NavType, locale: &str) -> String {
         NavType::Language => t!("navigation.language", locale = locale).to_string(),
         NavType::Rerun => t!("navigation.rerun", locale = locale).to_string(),
         NavType::Results => t!("navigation.results", locale = locale).to_string(),
+        NavType::Import => t!("navigation.import", locale = locale).to_string(),
     }
 }
 
@@ -49,8 +51,7 @@ fn get_shortcut(nav: &NavType) -> &str {
         NavType::Language => "c",
         NavType::Rerun => "r",
         NavType::Results => "ENTER",
+        NavType::Import => "i",
     }
 }
-
-
 
