@@ -1,13 +1,12 @@
-
 use crate::screens::{help, home, rerun, results, runner, test};
-use crate::service::{testservice, configservice};
+use crate::service::{testservice, configservice, ioservice};
 
 use std::io;
 use tui::{
     backend::Backend,
     Frame
 };
-use crossterm::event::{Event, KeyCode, KeyEvent};
+use crossterm::event::{Event, KeyCode, KeyEvent}; 
 
 use rusqlite::Connection;
 
@@ -20,6 +19,7 @@ pub enum ScreenType {
     Help,
     Quit,
     Runner,
+    Importer,
 }
 
 pub struct App {
@@ -40,8 +40,6 @@ impl App {
         let conn = testservice::init_conn_and_populate();
         let tests_to_do = testservice::get_to_do(&conn);
         let tests_finished = testservice::get_finished(&conn);
-        // TODO get that from config not to start with en always
-        //let default_locale = String::from("en");
         let default_locale = configservice::get_locale();
         // TODO should this be from config as well?
         let all_locales = vec![
@@ -70,6 +68,7 @@ impl App {
             ScreenType::Rerun => self.rerun.draw(f),
             ScreenType::Help => self.help.draw(f),
             ScreenType::Runner => self.runner.draw(f),
+            ScreenType::Importer => self.help.draw(f),
             ScreenType::Quit => self.is_finished = true,
         }
     }
@@ -169,6 +168,11 @@ impl App {
                     ScreenType::Home => {
                         self.update_locale(locale);
                         self.current_screen = screen
+                    },
+                    ScreenType::Importer => {
+                        self.help.import_results = ioservice::import_test_files(&self.locale);
+                        self.help.import_mode = 3;
+                        self.current_screen = ScreenType::Help;
                     },
                     _ => self.current_screen = screen
                 }

@@ -1,6 +1,5 @@
 use crate::app::ScreenType;
 use crate::ui::{layout, menu::Menu, navbar, navbar::NavType};
-use crate::service::ioservice;
 
 use tui::{
     backend::Backend,
@@ -20,8 +19,8 @@ pub struct Help {
     lang_name: String,
     switch_mode: bool,
     langs: Menu,
-    import_mode: u8,
-    import_results: Vec<String>,
+    pub import_mode: u8,
+    pub import_results: Vec<String>,
 }
 
 impl Help {
@@ -64,10 +63,14 @@ impl Help {
 
     pub fn handle_key_code(&mut self, code: KeyCode) -> (ScreenType, String) {
         match code {
-            KeyCode::Char('b') | KeyCode::Char('B') => return (ScreenType::Home, self.locale.clone()),
+            KeyCode::Char('b') | KeyCode::Char('B') => {
+                self.import_mode = 0;
+                self.import_results = vec![];
+                return (ScreenType::Home, self.locale.clone());
+            },
             KeyCode::Char('c') | KeyCode::Char('C') => self.handle_lang_switch(),
             KeyCode::Char('i') | KeyCode::Char('I') => self.handle_import_switch(),
-            KeyCode::Char('s') | KeyCode::Char('S') => self.handle_import(),
+            KeyCode::Char('s') | KeyCode::Char('S') => return self.handle_import(),
             KeyCode::Enter => self.handle_enter(),
             KeyCode::Up => {
                 if self.switch_mode {
@@ -112,17 +115,16 @@ impl Help {
         }
     }
 
-    fn handle_import(&mut self) {
+    fn handle_import(&mut self) -> (ScreenType, String) {
         if self.import_mode != 1 {
-            return;
+            return (ScreenType::Help, String::from(""))
         }
 
-        // TODO call in separate thread to see loading screen
         self.import_mode = 2;
-        self.import_results = ioservice::import_test_files(&self.locale);
-        self.import_mode = 3;
+        (ScreenType::Importer, String::from(""))
     }
 
+    // TODO have a similar solution as import to save config on Enter not on Back
     fn handle_enter(&mut self) {
         if !self.switch_mode {
             return;
