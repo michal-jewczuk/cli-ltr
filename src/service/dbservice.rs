@@ -1,6 +1,7 @@
 use crate::models::test;
 use rusqlite::Connection;
 use std::time::{Duration, SystemTime};
+use chrono::Utc;
 
 
 #[derive(Debug)]
@@ -200,6 +201,31 @@ pub fn save_result(conn: &Connection, result: test::ResultModel) -> Result<(), B
                 (r.0, r.1, r.2, r.3, r.4),
             );
         });
+    Ok(())
+}
+
+pub fn save_new_test(conn: &Connection, model: &test::TestModel) -> Result<(), Box<dyn std::error::Error>> {
+    let date = Utc::now().format("%Y-%m-%d").to_string();
+    let test_t = (&model.title, date, "NOT_STARTED");
+    let mut stmt_t = conn.prepare(
+        "INSERT INTO exam (name, date, status) VALUES (?1, ?2, ?3) RETURNING id",
+    )?;
+    let exam_id = stmt_t.query_row(test_t, |r| r.get::<_, i64>(0))?;
+
+    let mut q_num = 0;
+    model.questions.iter()
+        .map(|q| { 
+            q_num += 1;
+            (q_num, &q.question, &q.answers[0], &q.answers[1], &q.answers[2], &q.answers[3], q.correct, exam_id)
+        })
+        .for_each(|r| {
+            let _ = conn.execute(
+                "INSERT INTO question (number, text, a1, a2, a3, a4, correct, examid)
+                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+                (r.0, r.1, r.2, r.3, r.4, r.5, r.6, r.7),
+            );
+    });
+
     Ok(())
 }
 

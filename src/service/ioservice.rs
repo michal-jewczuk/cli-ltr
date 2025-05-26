@@ -1,11 +1,13 @@
 use crate::models::test;
+use crate::service::dbservice;
 
 use std::io;
 use std::fs::{self, DirEntry};
 use std::path::{Path, PathBuf};
 use rust_i18n::t;
+use rusqlite::Connection;
 
-pub fn import_test_files(locale: &str) -> Vec<String> {
+pub fn import_test_files(locale: &str, conn: &Connection) -> Vec<String> {
     let mut logs: Vec<String> = vec![];
     let files = read_test_files();
     files.iter()
@@ -28,7 +30,7 @@ pub fn import_test_files(locale: &str) -> Vec<String> {
 
     tests.iter()
         .filter(|t| validate_structure(t))
-        .map(|t| save_to_db(t, locale))
+        .map(|t| save_to_db(t, locale, conn))
         .for_each(|l| logs.push(l));
     
     // move valid and invalid to the same directory?
@@ -114,8 +116,10 @@ fn validate_structure(model: &test::TestModel) -> bool {
     return true;
 }
 
-fn save_to_db(model: &test::TestModel, locale: &str) -> String {
-    // TODO implement
-    format!("{}: {:?}",t!("import.save", locale = locale),  model.title)
+fn save_to_db(model: &test::TestModel, locale: &str, conn: &Connection) -> String {
+    match dbservice::save_new_test(conn, model) {
+        Ok(_) => format!("{}: {:?}",t!("import.save", locale = locale),  model.title),
+        Err(e) => format!("Error saving to db test: {} with error: {}", model.title, e),
+    }
 }
 

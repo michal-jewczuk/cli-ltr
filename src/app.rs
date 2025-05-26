@@ -170,7 +170,9 @@ impl App {
                         self.current_screen = screen
                     },
                     ScreenType::Importer => {
-                        self.help.import_results = ioservice::import_test_files(&self.locale);
+                        self.help.import_results = ioservice::import_test_files(&self.locale, &self.conn);
+                        let to_do = testservice::get_to_do(&self.conn);
+                        self.tests.update_items(to_do);
                         self.help.import_mode = 3;
                         self.current_screen = ScreenType::Help;
                     },
