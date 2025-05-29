@@ -18,15 +18,22 @@ pub fn import_test_files(locale: &str, conn: &Connection) -> Vec<String> {
         .map(|f| read_file_content(f))
         .collect::<Vec<test::TestModel>>();
 
+    let mut valid_logs: Vec<String> = vec![];
+    let mut invalid_logs: Vec<String> = vec![];
     let mut idx = 0;
     for test in &tests {
         if validate_structure(&test) {
-            logs.push(format!("{}: {:?}", t!("import.valid", locale = locale), files[idx].file_name().unwrap()))
+            valid_logs.push(format!("{}: {:?}", t!("import.valid", locale = locale), files[idx].file_name().unwrap()))
         } else {
-            logs.push(format!("{}: {:?}", t!("import.invalid", locale = locale), files[idx].file_name().unwrap()))
+            invalid_logs.push(format!("{}: {:?}", t!("import.invalid", locale = locale), files[idx].file_name().unwrap()))
         }
         idx += 1;
     }
+    logs.push(String::from(" "));
+    valid_logs.into_iter().for_each(|l| logs.push(l));
+    logs.push(String::from(" "));
+    invalid_logs.into_iter().for_each(|l| logs.push(l));
+    logs.push(String::from(" "));
 
     tests.iter()
         .filter(|t| validate_structure(t))
@@ -36,6 +43,7 @@ pub fn import_test_files(locale: &str, conn: &Connection) -> Vec<String> {
     // move valid and invalid to the same directory?
     files.into_iter().for_each(|f| move_to_finished(f, false));
 
+    logs.push(String::from(" "));
     logs.push(format!("{}", t!("import.finished", locale = locale)));
     logs.iter()
         .map(|l| l.to_string())
