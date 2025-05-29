@@ -12,15 +12,15 @@ use tui::{
 use crossterm::event::{KeyCode};
 use rust_i18n::t;
 
+// state: 0 - default, 1 - lang switch, 2 - import switch, 3 - import progress, 4 - import done
 pub struct Help {
     pub first_render: bool,
     pub locale: String,
+    pub state: u8,
+    pub import_results: Vec<String>,
     all_locales: Vec<(String, String)>,
     lang_name: String,
-    switch_mode: bool,
     langs: Menu,
-    pub import_mode: u8,
-    pub import_results: Vec<String>,
 }
 
 impl Help {
@@ -31,15 +31,13 @@ impl Help {
             .map(|t| t.1.clone())
             .collect();
         // TODO set initial menu selected lang based on app lang
-        // TODO have one mode that controlls display
         Help {
             first_render: true, 
             locale, 
+            state: 0,
             all_locales, 
             lang_name, 
-            switch_mode: false,
             langs: Menu::new(names),
-            import_mode: 0,
             import_results: vec![],
         }
     }
@@ -64,7 +62,7 @@ impl Help {
     pub fn handle_key_code(&mut self, code: KeyCode) -> (ScreenType, String) {
         match code {
             KeyCode::Char('b') | KeyCode::Char('B') => {
-                self.import_mode = 0;
+                self.state = 0;
                 self.import_results = vec![];
                 return (ScreenType::Home, self.locale.clone());
             },
@@ -73,24 +71,25 @@ impl Help {
             KeyCode::Char('s') | KeyCode::Char('S') => return self.handle_import(),
             KeyCode::Enter => self.handle_enter(),
             KeyCode::Up => {
-                if self.switch_mode {
+                if self.state == 1 {
                     self.langs.previous();
                 }
             },
             KeyCode::Down => {
-                if self.switch_mode {
+                if self.state == 1 {
                     self.langs.next();
                 }
             },
             KeyCode::Esc => {
-                if self.switch_mode {
-                    self.switch_mode = false;
+                // TODO refactor once lang is saved on enter
+                if self.state == 1 {
+                    self.state = 0;
                     let loc_idx = self.get_locale_idx();
                     self.langs.state.select(loc_idx);
                 }
 
-                if self.import_mode == 1 || self.import_mode == 3 {
-                    self.import_mode = 0;
+                if self.state == 2 || self.state == 4 {
+                    self.state = 0;
                 }
             }
             _ => {}
@@ -99,34 +98,37 @@ impl Help {
     }
 
     fn handle_lang_switch(&mut self) {
-        if self.switch_mode || self.import_mode == 1 || self.import_mode == 2  {
+        if self.state == 0 {
+            self.state = 1;
+        } else if self.state == 1 {
+            self.state = 0;
+        } else {
             return;
         }
-
-        self.switch_mode = true;
-        self.import_mode = 0;
     }
 
     fn handle_import_switch(&mut self) {
-        if self.import_mode == 0 {
-            self.import_mode = 1;
-        } else if self.import_mode == 1 || self.import_mode == 3 {
-            self.import_mode = 0;
+        if self.state == 0 {
+            self.state = 2
+        } else if self.state == 2 || self.state == 4 {
+            self.state = 0;
+        } else {
+            return;
         }
     }
 
     fn handle_import(&mut self) -> (ScreenType, String) {
-        if self.import_mode != 1 {
+        if self.state != 2 {
             return (ScreenType::Help, String::from(""))
         }
 
-        self.import_mode = 2;
+        self.state = 3;
         (ScreenType::Importer, String::from(""))
     }
 
     // TODO have a similar solution as import to save config on Enter not on Back
     fn handle_enter(&mut self) {
-        if !self.switch_mode {
+        if self.state != 1 {
             return;
         }
 
@@ -134,7 +136,7 @@ impl Help {
         let (code, name) = self.all_locales[idx].clone();
         self.locale = code;
         self.lang_name = name;
-        self.switch_mode = false;
+        self.state = 0;
     }
 
     fn render_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
@@ -176,7 +178,7 @@ impl Help {
         let selected_lang = layout::get_par_with_colors(selected_lang_text, Color::White, Color::Black);
         f.render_widget(selected_lang, layout[0]);
 
-        if self.import_mode != 0 {
+        if self.state > 1 {
             self.render_import_area(f, layout[1]);
         } else {
             self.render_switch_area(f, layout[1]);
@@ -184,7 +186,7 @@ impl Help {
     }
 
     fn render_import_area<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        if self.import_mode == 1 {
+        if self.state == 2 {
             let import_start_text = vec![
                 Spans::from(Span::raw("---------")),
                 Spans::from(Span::raw("")),
@@ -196,7 +198,7 @@ impl Help {
             let import_start = layout::get_par_with_colors(import_start_text, Color::White, Color::Black);
 
             f.render_widget(import_start, area);
-        } else if self.import_mode == 3 {
+        } else if self.state == 4 {
             let mut import_finish_text = vec![
                 Spans::from(Span::raw("---------")),
                 Spans::from(Span::raw("")),
@@ -208,7 +210,7 @@ impl Help {
             let import_finish = layout::get_par_with_colors(import_finish_text, Color::White, Color::Black);
 
             f.render_widget(import_finish, area);
-        } else if self.import_mode == 2 {
+        } else if self.state == 3 {
             let loading_text = vec![Spans::from(Span::raw("importing..."))];
             let loading = layout::get_par_with_colors(loading_text, Color::White, Color::Black);
 
@@ -217,9 +219,9 @@ impl Help {
     }
 
     fn render_switch_area<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-        if !self.switch_mode {
+        if self.state == 0 {
             f.render_widget(Clear, area);
-        } else {
+        } else if self.state == 1 {
             let lang_list = layout::create_navigable_list(self.langs.items.clone());
             
             f.render_stateful_widget(lang_list, area, &mut self.langs.state);
