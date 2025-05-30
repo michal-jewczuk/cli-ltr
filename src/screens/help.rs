@@ -69,7 +69,7 @@ impl Help {
             KeyCode::Char('c') | KeyCode::Char('C') => self.handle_lang_switch(),
             KeyCode::Char('i') | KeyCode::Char('I') => self.handle_import_switch(),
             KeyCode::Char('s') | KeyCode::Char('S') => return self.handle_import(),
-            KeyCode::Enter => self.handle_enter(),
+            KeyCode::Enter => return self.handle_enter(),
             KeyCode::Up => {
                 if self.state == 1 {
                     self.langs.previous();
@@ -81,17 +81,10 @@ impl Help {
                 }
             },
             KeyCode::Esc => {
-                // TODO refactor once lang is saved on enter
-                if self.state == 1 {
-                    self.state = 0;
-                    let loc_idx = self.get_locale_idx();
-                    self.langs.state.select(loc_idx);
-                }
-
-                if self.state == 2 || self.state == 4 {
+                if self.state == 1 || self.state == 2 || self.state == 4 {
                     self.state = 0;
                 }
-            }
+            },
             _ => {}
         } 
         (ScreenType::Help, self.locale.clone())
@@ -126,10 +119,9 @@ impl Help {
         (ScreenType::Importer, String::from(""))
     }
 
-    // TODO have a similar solution as import to save config on Enter not on Back
-    fn handle_enter(&mut self) {
+    fn handle_enter(&mut self) -> (ScreenType, String) {
         if self.state != 1 {
-            return;
+            return (ScreenType::Help, String::from(""));
         }
 
         let idx = self.langs.state.selected().unwrap();
@@ -137,6 +129,7 @@ impl Help {
         self.locale = code;
         self.lang_name = name;
         self.state = 0;
+        (ScreenType::Config, self.locale.clone())
     }
 
     fn render_header<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {

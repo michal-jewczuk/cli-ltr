@@ -20,6 +20,7 @@ pub enum ScreenType {
     Quit,
     Runner,
     Importer,
+    Config,
 }
 
 pub struct App {
@@ -69,6 +70,7 @@ impl App {
             ScreenType::Help => self.help.draw(f),
             ScreenType::Runner => self.runner.draw(f),
             ScreenType::Importer => self.help.draw(f),
+            ScreenType::Config => self.help.draw(f),
             ScreenType::Quit => self.is_finished = true,
         }
     }
@@ -168,6 +170,10 @@ impl App {
                     ScreenType::Home => {
                         self.update_locale(locale);
                         self.current_screen = screen
+                    },
+                    ScreenType::Config => {
+                        self.update_locale(locale);
+                        self.current_screen = ScreenType::Help 
                     },
                     ScreenType::Importer => {
                         self.help.import_results = ioservice::import_test_files(&self.locale, &self.conn);

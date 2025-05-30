@@ -375,7 +375,7 @@ pub fn populate_questions(conn: &Connection) {
         ),
         (
             4,
-            "What is the proper way to say: '3 + 3' 'is six' or 'are six'?",
+            "What is the proper way to say: '3 * 3' 'is six' or 'are six'?",
             "is six",
             "are six",
             "is nine",
