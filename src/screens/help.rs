@@ -30,14 +30,23 @@ impl Help {
         let names: Vec<String> = all_locales.iter()
             .map(|t| t.1.clone())
             .collect();
-        // TODO set initial menu selected lang based on app lang
+        let mut selected = 0;
+        for l in all_locales.iter() {
+            if l.0 != locale {
+                selected += 1;
+            } else {
+                break;
+            }
+        }
+        let mut langs_list = Menu::new(names);
+        langs_list.state.select(Some(selected)); 
         Help {
             first_render: true, 
             locale, 
             state: 0,
             all_locales, 
             lang_name, 
-            langs: Menu::new(names),
+            langs: langs_list,
             import_results: vec![],
         }
     }
