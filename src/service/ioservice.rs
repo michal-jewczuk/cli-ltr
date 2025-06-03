@@ -1,8 +1,7 @@
 use crate::models::test;
 use crate::service::dbservice;
 
-use std::io;
-use std::fs::{self, DirEntry};
+use std::fs::{self};
 use std::path::{Path, PathBuf};
 use rust_i18n::t;
 use rusqlite::Connection;

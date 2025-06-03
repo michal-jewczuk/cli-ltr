@@ -229,16 +229,5 @@ impl Help {
             f.render_stateful_widget(lang_list, area, &mut self.langs.state);
         }
     }
-
-    fn get_locale_idx(&self) -> Option<usize> {
-        let mut idx = 0;
-        for locale in self.all_locales.iter() {
-            if locale.0 == self.locale {
-                return Some(idx);
-            }
-            idx += 1;
-        }
-        return None;
-    }
 }
 
